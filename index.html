@@ -23,11 +23,14 @@ button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
 #rCenter{background:#222;overflow:auto;display:flex;justify-content:center;align-items:flex-start;}
 #canvasWrap{background:#eee;width:1200px;height:1200px;overflow:auto;}
 #canvas{display:grid;grid-template-columns:repeat(100,12px);}
-.pixel{width:12px;height:12px;background:#fff;border:1px solid #ddd;cursor:pointer;}
+.pixel{width:12px;height:12px;background:#fff;cursor:pointer;} /* gri çizgi yok */
 #rChat{background:#12001f;padding:10px;display:flex;flex-direction:column;}
 #rMsgs{flex:1;overflow-y:auto}
 #rBottom{grid-column:1/4;background:#1a002b;display:flex;align-items:center;gap:15px;padding:10px;}
 #rBottom input[type=color]{width:40px;height:40px;padding:0;border:none;}
+#profileDisplay{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+#profileDisplay img{width:40px;height:40px;border-radius:50%;border:2px solid #fff;}
+#profileDisplay span{font-weight:bold;}
 </style>
 </head>
 <body>
@@ -51,6 +54,22 @@ button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
     <button id="startClicker">🖱️ Tıklamaca</button>
     <button id="startRplace">🎨 r/place</button>
     <button id="logoutBtn">Çıkış</button>
+  </div>
+  <div id="profileDisplay">
+    <img id="avatar" src="https://i.pravatar.cc/40">
+    <span id="profileName"></span>
+  </div>
+</div>
+
+<!-- PROFİL POPUP -->
+<div id="profilePopup" class="popup">
+  <div class="popupBox">
+    <h3>👑 Profil Menüsü</h3>
+    <button id="profileTabBtn">Profil</button>
+    <button id="nameTabBtn">Adımız</button>
+    <button id="dmTabBtn">Mesajlar</button>
+    <div id="profileContent" style="margin-top:15px;text-align:left;"></div>
+    <button onclick="profilePopup.style.display='none'" style="margin-top:15px;">Kapat</button>
   </div>
 </div>
 
@@ -175,7 +194,6 @@ onAuthStateChanged(auth,u=>{
 
   user=u;
 
-  // Yasaklı kontrol
   get(ref(db,"bannedUsers/"+u.uid)).then(s=>{
     if(s.exists()){
       authDiv.classList.remove("hidden");
@@ -196,23 +214,18 @@ onAuthStateChanged(auth,u=>{
     score.innerText="Altın: "+userData.score;
     power.innerText="Tıklama Gücü: "+userData.power;
     marketInfo.innerText=`Güç +1 | Fiyat ${userData.price}`;
+    profileName.innerText=userData.username;
   });
 });
 
 /* ===== GAME SELECT ===== */
-startClicker.onclick=()=>{
-  gameSelect.classList.add("hidden");
-  gameRoot.classList.remove("hidden");
-};
+startClicker.onclick=()=>{gameSelect.classList.add("hidden");gameRoot.classList.remove("hidden");};
 startRplace.onclick=()=>{
   gameSelect.classList.add("hidden");
   rplaceRoot.classList.remove("hidden");
   set(ref(db,"rplace/online/"+user.uid),userData.username);
 };
-backMenuBtn.onclick=()=>{
-  gameRoot.classList.add("hidden");
-  gameSelect.classList.remove("hidden");
-};
+backMenuBtn.onclick=()=>{gameRoot.classList.add("hidden");gameSelect.classList.remove("hidden");};
 rBack.onclick=()=>{
   rplaceRoot.classList.add("hidden");
   gameSelect.classList.remove("hidden");
@@ -250,62 +263,77 @@ onValue(ref(db,"users"),s=>{
   });
 });
 
-/* ===== CHAT + /sustur /yasakla /affet ===== */
-function sendMessage(chatPath,inputEl,msgEl){
-  onValue(ref(db,chatPath),s=>{
-    chatMsg=msgEl;
-    chatMsg.innerHTML="";
-    Object.entries(s.val()||{}).forEach(([k,m])=>{
-      get(ref(db,"mutedUsers/"+m.user)).then(s=>{
-        if(s.exists()) return; 
-        chatMsg.innerHTML+=`${m.user}: ${m.text}<br>`;
-      });
+/* ===== CHAT & KOMUTLAR ===== */
+function updateChat(chatEl, chatPath){
+  onValue(ref(db, chatPath), s=>{
+    chatEl.innerHTML = "";
+    const messages = s.val() || {};
+    Object.values(messages).forEach(m=>{
+      chatEl.innerHTML += `${m.user}: ${m.text}<br>`;
     });
+    chatEl.scrollTop = chatEl.scrollHeight;
   });
 }
+updateChat(chatMessages, "chat/tiklamaca");
+updateChat(rMsgs, "chat/rplace");
 
-function handleChat(inputEl,chatPath){
-  const msg=inputEl.value.trim();
-  if(!msg) return;
-  inputEl.value="";
-  if(!userData) return;
+function sendChat(msg, chatPath){
+  if(!msg || !userData) return;
 
-  if(userData.username==="remobaba"){
-    if(msg.startsWith("/sustur ")){
-      const target=msg.split(" ")[1];
-      if(!target) return;
-      get(ref(db,"usernames/"+target)).then(s=>{
-        if(s.exists()) set(ref(db,"mutedUsers/"+s.val()),true);
-      });
-      return;
-    }
-    if(msg.startsWith("/yasakla ")){
-      const target=msg.split(" ")[1];
-      if(!target) return;
-      get(ref(db,"usernames/"+target)).then(s=>{
-        if(s.exists()) setref(db,"bannedUsers/"+s.val(),true);
-      });
-      return;
-    }
-    if(msg.startsWith("/affet ")){
-      const target=msg.split(" ")[1];
-      if(!target) return;
-      get(ref(db,"usernames/"+target)).then(s=>{
-        if(s.exists()){
-          remove(ref(db,"mutedUsers/"+s.val()));
-          remove(ref(db,"bannedUsers/"+s.val()));
-        }
-      });
-      return;
-    }
-  }
+  get(ref(db, "mutedUsers/" + user.uid)).then(s=>{
+    if(s.exists()) return; // susturulmuşsa gönderemez
 
-  // susturulmuş mu kontrol
-  get(ref(db,"mutedUsers/"+user.uid)).then(s=>{if(s.exists()) return; push(ref(db,chatPath),{user:userData.username,text:msg});});
+    // remobaba komutları
+    if(userData.username === "remobaba"){
+      if(msg.startsWith("/sustur ")){
+        const target = msg.split(" ")[1];
+        if(!target) return;
+        get(ref(db,"usernames/"+target)).then(s=>{
+          if(s.exists()){
+            set(ref(db,"mutedUsers/"+s.val()), true);
+            push(ref(db, chatPath), { user:"Sistem", text:`${target} susturuldu ✅` });
+          }
+        });
+        return chatInput.value="", rInput.value="";
+      }
+      if(msg.startsWith("/yasakla ")){
+        const target = msg.split(" ")[1];
+        if(!target) return;
+        get(ref(db,"usernames/"+target)).then(s=>{
+          if(s.exists()){
+            set(ref(db,"bannedUsers/"+s.val()), true);
+            push(ref(db, chatPath), { user:"Sistem", text:`${target} yasaklandı ❌` });
+            if(target === userData.username) signOut(auth);
+          }
+        });
+        return chatInput.value="", rInput.value="";
+      }
+      if(msg.startsWith("/affet ")){
+        const target = msg.split(" ")[1];
+        if(!target) return;
+        get(ref(db,"usernames/"+target)).then(s=>{
+          if(s.exists()){
+            remove(ref(db,"mutedUsers/"+s.val()));
+            remove(ref(db,"bannedUsers/"+s.val()));
+            push(ref(db, chatPath), { user:"Sistem", text:`${target} affedildi ⚪` });
+          }
+        });
+        return chatInput.value="", rInput.value="";
+      }
+      if(msg==="/temizle"){
+        remove(ref(db, chatPath));
+        push(ref(db, chatPath), { user:"Sistem", text:`Sohbet temizlendi 🧹` });
+        return chatInput.value="", rInput.value="";
+      }
+    }
+
+    // normal mesaj
+    push(ref(db, chatPath), { user: userData.username, text: msg });
+    chatInput.value=""; rInput.value="";
+  });
 }
-
-sendBtn.onclick=()=>handleChat(chatInput,"chat/tiklamaca");
-rSend.onclick=()=>handleChat(rInput,"chat/rplace");
+sendBtn.onclick = ()=>sendChat(chatInput.value, "chat/tiklamaca");
+rSend.onclick   = ()=>sendChat(rInput.value, "chat/rplace");
 
 /* ===== RPLACE ===== */
 let paint=30;
@@ -323,7 +351,6 @@ for(let y=0;y<100;y++)for(let x=0;x<100;x++){
   };
   canvas.appendChild(p);
 }
-
 onValue(ref(db,"rplace/pixels"),s=>{
   const d=s.val()||{};
   document.querySelectorAll(".pixel").forEach(px=>{
@@ -336,6 +363,39 @@ const onlineEl=document.getElementById("online");
 onValue(ref(db,"rplace/online"),s=>{
   onlineEl.innerText=Object.keys(s.val()||{}).length;
 });
+
+/* ===== PROFİL MENÜSÜ ===== */
+profileDisplay.onclick = () => { profilePopup.style.display = 'flex'; };
+
+profileTabBtn.onclick = () => {
+  profileContent.innerHTML = `
+    <strong>Kullanıcı Adı:</strong> ${userData.username}<br>
+    <strong>Altın:</strong> ${userData.score}<br>
+    <strong>Tıklama Gücü:</strong> ${userData.power}<br>
+  `;
+};
+nameTabBtn.onclick = () => {
+  profileContent.innerHTML = `<strong>Adımız:</strong> ${userData.username}`;
+};
+dmTabBtn.onclick = () => {
+  profileContent.innerHTML = `
+    <input id="dmTarget" placeholder="Kullanıcı Adı">
+    <input id="dmMessage" placeholder="Mesaj">
+    <button id="sendDMBtn">Gönder</button>
+    <div id="dmStatus" style="margin-top:10px;"></div>
+  `;
+  document.getElementById("sendDMBtn").onclick = () => {
+    const t=document.getElementById("dmTarget").value.trim();
+    const m=document.getElementById("dmMessage").value.trim();
+    if(!t||!m) return;
+    get(ref(db,"usernames/"+t)).then(s=>{
+      if(!s.exists()){ document.getElementById("dmStatus").innerText="Kullanıcı bulunamadı!"; return; }
+      push(ref(db,"dm/"+s.val()),{from:userData.username,text:m});
+      document.getElementById("dmStatus").innerText="Mesaj gönderildi ✅";
+      document.getElementById("dmMessage").value="";
+    });
+  };
+};
 </script>
 </body>
 </html>
