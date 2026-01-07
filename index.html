@@ -2,30 +2,157 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Oyna Kral</title>
+<title>OynaKral</title>
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;height:100vh;background:#0e0016;color:#fff;font-family:Arial;}
-.center{display:flex;justify-content:center;align-items:center;}
-.card{background:rgba(0,0,0,.6);padding:40px;border-radius:16px;width:420px;text-align:center;}
-.big{font-size:26px;padding:22px;}
-input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:none;cursor:pointer;}
-#gameRoot{display:none;height:100vh;display:grid;grid-template-columns:260px 1fr 360px;}
-#leftMenu{background:#12001f;padding:10px;display:flex;flex-direction:column;gap:10px;}
-.menuBtn{padding:12px;background:#7a3cff;color:#fff;font-weight:bold;border-radius:8px;}
-#sidePanel{padding:10px;display:flex;flex-direction:column;gap:10px;}
-.panel{background:rgba(0,0,0,.5);padding:10px;border-radius:10px;}
-#chatMessages{flex:1;overflow-y:auto;max-height:200px;}
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;}
-.popupBox{background:#1a002b;padding:20px;border-radius:14px;width:360px;text-align:center;}
+body{
+  margin:0;
+  height:100vh;
+  background:#0e0016;
+  color:#fff;
+  font-family:Arial;
+  overflow:hidden;
+}
+.hidden{display:none!important}
+.center{display:flex;justify-content:center;align-items:center}
+
+.card{
+  background:rgba(0,0,0,.65);
+  padding:40px;
+  border-radius:18px;
+  width:420px;
+  text-align:center;
+}
+
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+}
+button{
+  background:#7a3cff;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ========== GAME ROOT (TIKLAMACA) ========== */
+#gameRoot{
+  height:100vh;
+  display:grid;
+  grid-template-columns:220px 1fr 300px;
+}
+#leftMenu{
+  background:#12001f;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+#sidePanel{
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.panel{
+  background:rgba(0,0,0,.5);
+  padding:10px;
+  border-radius:10px;
+}
+#chatMessages{max-height:200px;overflow-y:auto}
+
+/* ========== POPUP ========== */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+.popupBox{
+  background:#1a002b;
+  padding:25px;
+  border-radius:18px;
+  width:380px;
+  text-align:center;
+}
+
+/* ========== RPLACE ========== */
+#rplaceRoot{
+  height:100vh;
+  display:grid;
+  grid-template-columns:180px 1fr 300px;
+  grid-template-rows:calc(100vh - 60px) 60px;
+}
+
+#rLeft{
+  background:#12001f;
+  padding:10px;
+}
+
+#rCenter{
+  background:#222;
+  overflow:auto;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+#canvasWrap{
+  background:#eee;
+  width:1200px;
+  height:1200px;
+  overflow:auto;
+}
+
+#canvas{
+  display:grid;
+  grid-template-columns:repeat(100,12px);
+}
+
+.pixel{
+  width:12px;
+  height:12px;
+  background:#fff;
+  border:1px solid #ddd;
+  cursor:pointer;
+}
+
+#rChat{
+  background:#12001f;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+}
+#rMsgs{flex:1;overflow-y:auto}
+
+#rBottom{
+  grid-column:1/4;
+  background:#1a002b;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:10px;
+}
+#rBottom input[type=color]{
+  width:40px;
+  height:40px;
+  padding:0;
+  border:none;
+}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div class="center" id="auth">
+<div class="center" id="authDiv">
   <div class="card">
-    <h2>Giriş / Kayıt</h2>
+    <h1>👑 OynaKral</h1>
     <input id="username" placeholder="Kullanıcı Adı">
     <input id="password" type="password" placeholder="Şifre">
     <button id="registerBtn">Kayıt Ol</button>
@@ -34,31 +161,41 @@ input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:non
   </div>
 </div>
 
-<!-- GAME -->
-<div id="gameRoot">
+<!-- GAME SELECT -->
+<div class="center hidden" id="gameSelect">
+  <div class="card">
+    <h2>🎮 Oyun Seç</h2>
+    <button id="startClicker">🖱️ Tıklamaca</button>
+    <button id="startRplace">🎨 r/place</button>
+    <button id="logoutBtn">Çıkış</button>
+  </div>
+</div>
+
+<!-- TIKLAMACA -->
+<div id="gameRoot" class="hidden">
   <div id="leftMenu">
-    <button class="menuBtn" id="marketBtn">🛒 Market</button>
-    <button class="menuBtn" id="casinoBtn">🎰 Casino</button>
+    <button id="marketBtn">🛒 Market</button>
+    <button id="casinoBtn">🎰 Casino</button>
+    <button id="backMenuBtn">⬅ Oyun Menüsü</button>
   </div>
 
   <div class="center">
     <div class="card">
       <h2 id="score">Altın: 0</h2>
       <h3 id="power">Tıklama Gücü: 1</h3>
-      <button class="big" id="clickBtn">🖱️ TIKLA</button>
-      <button id="logoutBtn">Çıkış</button>
+      <button id="clickBtn">🖱️ TIKLA</button>
     </div>
   </div>
 
   <div id="sidePanel">
     <div class="panel">
-      <h3>🏆 İlk 5</h3>
+      <h3>🏆 Scoreboard</h3>
       <ul id="board"></ul>
     </div>
     <div class="panel">
       <h3>💬 Chat</h3>
       <div id="chatMessages"></div>
-      <input id="chatInput" placeholder="Mesaj yaz">
+      <input id="chatInput">
       <button id="sendBtn">Gönder</button>
     </div>
   </div>
@@ -67,152 +204,209 @@ input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:non
 <!-- MARKET -->
 <div id="market" class="popup">
   <div class="popupBox">
-    <h2>🛒 Market</h2>
-    <p id="powerInfo"></p>
-    <button id="buyPowerBtn">Tıklama Gücü Artır</button>
-    <p id="autoClickInfo"></p>
-    <button id="buyAutoClickBtn">Oto Click Al</button>
-    <button id="closeMarketBtn">Kapat</button>
+    <h3>🛒 Market</h3>
+    <p id="marketInfo"></p>
+    <button id="buyPowerBtn">SATIN AL</button>
+    <button onclick="market.style.display='none'">Kapat</button>
   </div>
 </div>
 
 <!-- CASINO -->
 <div id="casino" class="popup">
   <div class="popupBox">
-    <h2>🪙 Yazı – Tura</h2>
+    <h3>🎰 Yazı Tura</h3>
     <input id="bet" type="number" placeholder="Bahis">
-    <button id="yaziBtn">Yazı</button>
-    <button id="turaBtn">Tura</button>
+    <button onclick="coin('yazi')">Yazı</button>
+    <button onclick="coin('tura')">Tura</button>
     <p id="coinInfo"></p>
-    <button id="closeCasinoBtn">Kapat</button>
+    <button onclick="casino.style.display='none'">Kapat</button>
+  </div>
+</div>
+
+<!-- RPLACE -->
+<div id="rplaceRoot" class="hidden">
+  <div id="rLeft">
+    <button id="rBack">⬅ Oyun Menüsü</button>
+  </div>
+
+  <div id="rCenter">
+    <div id="canvasWrap">
+      <div id="canvas"></div>
+    </div>
+  </div>
+
+  <div id="rChat">
+    <h3>💬 r/place Chat</h3>
+    <div id="rMsgs"></div>
+    <input id="rInput">
+    <button id="rSend">Gönder</button>
+  </div>
+
+  <div id="rBottom">
+    <input type="color" id="color" value="#ff0000">
+    <div>Boya: <span id="paint">30</span>/30</div>
+    <div>🟢 Aktif: <span id="online">1</span></div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase,ref,set,push,onValue,runTransaction,get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase,ref,set,push,onValue,runTransaction,get,remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig={
+const app=initializeApp({
   apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
   authDomain:"click-game-2de2f.firebaseapp.com",
-  databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com",
-  projectId:"click-game-2de2f"
-};
-
-const app=initializeApp(firebaseConfig);
-const firebaseAuth=getAuth(app);
+  databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com"
+});
+const auth=getAuth(app);
 const db=getDatabase(app);
 
-const authDiv=document.getElementById("auth");
-const gameRoot=document.getElementById("gameRoot");
+let user=null,userData=null;
 
-let currentUser=null;
-let usernameGlobal="";
-let powerPrice=100;
-let autoClickLevel=0;
-let autoClickPrice=250;
-let autoClickInterval=null;
-
+/* AUTH */
 registerBtn.onclick=async()=>{
-  if(!username.value||!password.value) return;
-  const snap=await get(ref(db,"usernames/"+username.value));
-  if(snap.exists()) return authMsg.innerText="Kullanıcı adı alınmış";
-  const r=await createUserWithEmailAndPassword(firebaseAuth,username.value+"@c.local",password.value);
-  await set(ref(db,"users/"+r.user.uid),{username:username.value,score:0,power:1,price:100,autoClick:0});
-  await set(ref(db,"usernames/"+username.value),r.user.uid);
+  const n=username.value,p=password.value;
+  if(!n||!p)return;
+  if((await get(ref(db,"usernames/"+n))).exists())return;
+  const c=await createUserWithEmailAndPassword(auth,n+"@ok.com",p);
+  await set(ref(db,"users/"+c.user.uid),{username:n,score:0,power:1,price:100});
+  await set(ref(db,"usernames/"+n),c.user.uid);
 };
+loginBtn.onclick=()=>signInWithEmailAndPassword(auth,username.value+"@ok.com",password.value);
+logoutBtn.onclick=()=>signOut(auth);
 
-loginBtn.onclick=()=>signInWithEmailAndPassword(firebaseAuth,username.value+"@c.local",password.value);
-logoutBtn.onclick=()=>signOut(firebaseAuth);
-
-onAuthStateChanged(firebaseAuth,user=>{
-  if(!user){
-    authDiv.style.display="flex";
-    gameRoot.style.display="none";
+onAuthStateChanged(auth,u=>{
+  if(!u){
+    authDiv.classList.remove("hidden");
+    gameSelect.classList.add("hidden");
+    gameRoot.classList.add("hidden");
+    rplaceRoot.classList.add("hidden");
     return;
   }
-  currentUser=user;
-  authDiv.style.display="none";
-  gameRoot.style.display="grid";
+  user=u;
+  authDiv.classList.add("hidden");
+  gameSelect.classList.remove("hidden");
 
-  onValue(ref(db,"users/"+user.uid),s=>{
-    const d=s.val(); if(!d) return;
-    score.innerText="Altın: "+Math.floor(d.score);
-    power.innerText="Tıklama Gücü: "+d.power;
-    usernameGlobal=d.username;
-    powerPrice=d.price;
-    autoClickLevel=d.autoClick;
-    autoClickPrice=Math.floor(250*Math.pow(1.15,autoClickLevel));
-    powerInfo.innerText=`Tıklama Gücü Fiyat: ${powerPrice}`;
-    autoClickInfo.innerText=`Oto Click Fiyat: ${autoClickPrice}`;
-
-    if(autoClickInterval) clearInterval(autoClickInterval);
-    if(autoClickLevel>0){
-      autoClickInterval=setInterval(()=>{
-        runTransaction(ref(db,"users/"+user.uid),d=>{
-          d.score+=autoClickLevel; return d;
-        });
-      },1000);
-    }
+  onValue(ref(db,"users/"+u.uid),s=>{
+    userData=s.val();
+    if(!userData)return;
+    score.innerText="Altın: "+userData.score;
+    power.innerText="Tıklama Gücü: "+userData.power;
+    marketInfo.innerText=`Güç +1 | Fiyat ${userData.price}`;
   });
 });
 
-clickBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-  d.score+=d.power; return d;
-});
+/* GAME SELECT */
+startClicker.onclick=()=>{
+  gameSelect.classList.add("hidden");
+  gameRoot.classList.remove("hidden");
+};
+startRplace.onclick=()=>{
+  gameSelect.classList.add("hidden");
+  rplaceRoot.classList.remove("hidden");
+};
+backMenuBtn.onclick=()=>{
+  gameRoot.classList.add("hidden");
+  gameSelect.classList.remove("hidden");
+};
+rBack.onclick=()=>{
+  rplaceRoot.classList.add("hidden");
+  gameSelect.classList.remove("hidden");
+};
 
+/* CLICKER */
+clickBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{d.score+=d.power;return d});
 marketBtn.onclick=()=>market.style.display="flex";
-closeMarketBtn.onclick=()=>market.style.display="none";
+buyPowerBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{
+  if(d.score<d.price)return d;
+  d.score-=d.price;
+  d.power++;
+  d.price=Math.floor(d.price*1.1);
+  return d;
+});
+
+/* CASINO */
 casinoBtn.onclick=()=>casino.style.display="flex";
-closeCasinoBtn.onclick=()=>casino.style.display="none";
-
-buyPowerBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-  if(d.score<powerPrice) return d;
-  d.score-=powerPrice; d.power++;
-  d.price=Math.floor(powerPrice*1.1);
-  return d;
-});
-
-buyAutoClickBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-  if(d.score<autoClickPrice) return d;
-  d.score-=autoClickPrice; d.autoClick++;
-  return d;
-});
-
-yaziBtn.onclick=()=>coin("yazi");
-turaBtn.onclick=()=>coin("tura");
-
-function coin(c){
-  const bet=parseInt(betInput.value||bet.value);
-  runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-    if(d.score<bet) return d;
-    d.score-=bet;
-    const r=Math.random()<0.5?"yazi":"tura";
-    if(r===c) d.score+=bet*2;
-    coinInfo.innerText=`Sonuç: ${r}`;
+window.coin=(c)=>{
+  const b=+bet.value;
+  runTransaction(ref(db,"users/"+user.uid),d=>{
+    if(d.score<b)return d;
+    d.score-=b;
+    const r=Math.random()<.5?"yazi":"tura";
+    if(r===c)d.score+=b*2;
+    coinInfo.innerText=r===c?"Kazandın":"Kaybettin";
     return d;
   });
-}
+};
 
+/* SCOREBOARD */
 onValue(ref(db,"users"),s=>{
   board.innerHTML="";
-  Object.values(s.val()||{}).sort((a,b)=>b.score-a.score).slice(0,5)
-  .forEach(u=>board.innerHTML+=`<li>${u.username}: ${Math.floor(u.score)}</li>`);
+  Object.values(s.val()||{}).sort((a,b)=>b.score-a.score)
+  .slice(0,5).forEach(u=>{
+    board.innerHTML+=`<li>${u.username}: ${u.score}</li>`;
+  });
 });
 
-onValue(ref(db,"chat"),s=>{
+/* CHAT – TIKLAMACA + /temizle */
+onValue(ref(db,"chat/tiklamaca"),s=>{
   chatMessages.innerHTML="";
   Object.values(s.val()||{}).forEach(m=>{
     chatMessages.innerHTML+=`${m.user}: ${m.text}<br>`;
   });
-  chatMessages.scrollTop=chatMessages.scrollHeight;
+});
+sendBtn.onclick=()=>{
+  const msg=chatInput.value.trim();
+  if(!msg)return;
+  chatInput.value="";
+  if(msg==="/temizle" && userData.username==="remobaba"){
+    remove(ref(db,"chat/tiklamaca"));
+    return;
+  }
+  push(ref(db,"chat/tiklamaca"),{user:userData.username,text:msg});
+};
+
+/* RPLACE */
+let paint=30;
+const paintEl=document.getElementById("paint");
+setInterval(()=>{if(paint<30){paint++;paintEl.innerText=paint}},5000);
+
+for(let y=0;y<100;y++)for(let x=0;x<100;x++){
+  const p=document.createElement("div");
+  p.className="pixel";
+  p.dataset.id=`${x}_${y}`;
+  p.onclick=()=>{
+    if(paint<=0)return;
+    paint--;paintEl.innerText=paint;
+    set(ref(db,"rplace/pixels/"+p.dataset.id),color.value);
+  };
+  canvas.appendChild(p);
+}
+
+onValue(ref(db,"rplace/pixels"),s=>{
+  const d=s.val()||{};
+  document.querySelectorAll(".pixel").forEach(px=>{
+    if(d[px.dataset.id])px.style.background=d[px.dataset.id];
+  });
 });
 
-sendBtn.onclick=()=>{
-  if(!chatInput.value) return;
-  push(ref(db,"chat"),{user:usernameGlobal,text:chatInput.value});
-  chatInput.value="";
+/* RPLACE CHAT + /temizle */
+onValue(ref(db,"chat/rplace"),s=>{
+  rMsgs.innerHTML="";
+  Object.values(s.val()||{}).forEach(m=>{
+    rMsgs.innerHTML+=`${m.user}: ${m.text}<br>`;
+  });
+});
+rSend.onclick=()=>{
+  const msg=rInput.value.trim();
+  if(!msg)return;
+  rInput.value="";
+  if(msg==="/temizle" && userData.username==="remobaba"){
+    remove(ref(db,"chat/rplace"));
+    return;
+  }
+  push(ref(db,"chat/rplace"),{user:userData.username,text:msg});
 };
 </script>
 </body>
