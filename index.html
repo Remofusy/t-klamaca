@@ -28,7 +28,7 @@ button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
 #rMsgs{flex:1;overflow-y:auto}
 #rBottom{grid-column:1/4;background:#1a002b;display:flex;align-items:center;gap:15px;padding:10px;}
 #rBottom input[type=color]{width:40px;height:40px;padding:0;border:none;}
-#profileDisplay{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:10px;cursor:pointer;}
+#profileDisplay{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:10px;}
 #profileDisplay img{width:40px;height:40px;border-radius:50%;border:2px solid #fff;}
 #profileDisplay span{font-weight:bold;}
 </style>
@@ -58,18 +58,6 @@ button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
   <div id="profileDisplay">
     <img id="avatar" src="https://i.pravatar.cc/40">
     <span id="profileName"></span>
-  </div>
-</div>
-
-<!-- PROFİL POPUP -->
-<div id="profilePopup" class="popup">
-  <div class="popupBox">
-    <h3>👑 Profil Menüsü</h3>
-    <button id="profileTabBtn">Profil</button>
-    <button id="nameTabBtn">Adımız</button>
-    <button id="dmTabBtn">Mesajlar</button>
-    <div id="profileContent" style="margin-top:15px;text-align:left;"></div>
-    <button onclick="profilePopup.style.display='none'" style="margin-top:15px;">Kapat</button>
   </div>
 </div>
 
@@ -363,39 +351,6 @@ const onlineEl=document.getElementById("online");
 onValue(ref(db,"rplace/online"),s=>{
   onlineEl.innerText=Object.keys(s.val()||{}).length;
 });
-
-/* ===== PROFİL MENÜSÜ ===== */
-profileDisplay.onclick = () => { profilePopup.style.display = 'flex'; };
-
-profileTabBtn.onclick = () => {
-  profileContent.innerHTML = `
-    <strong>Kullanıcı Adı:</strong> ${userData.username}<br>
-    <strong>Altın:</strong> ${userData.score}<br>
-    <strong>Tıklama Gücü:</strong> ${userData.power}<br>
-  `;
-};
-nameTabBtn.onclick = () => {
-  profileContent.innerHTML = `<strong>Adımız:</strong> ${userData.username}`;
-};
-dmTabBtn.onclick = () => {
-  profileContent.innerHTML = `
-    <input id="dmTarget" placeholder="Kullanıcı Adı">
-    <input id="dmMessage" placeholder="Mesaj">
-    <button id="sendDMBtn">Gönder</button>
-    <div id="dmStatus" style="margin-top:10px;"></div>
-  `;
-  document.getElementById("sendDMBtn").onclick = () => {
-    const t=document.getElementById("dmTarget").value.trim();
-    const m=document.getElementById("dmMessage").value.trim();
-    if(!t||!m) return;
-    get(ref(db,"usernames/"+t)).then(s=>{
-      if(!s.exists()){ document.getElementById("dmStatus").innerText="Kullanıcı bulunamadı!"; return; }
-      push(ref(db,"dm/"+s.val()),{from:userData.username,text:m});
-      document.getElementById("dmStatus").innerText="Mesaj gönderildi ✅";
-      document.getElementById("dmMessage").value="";
-    });
-  };
-};
 </script>
 </body>
 </html>
