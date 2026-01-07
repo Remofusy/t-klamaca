@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Online Clicker</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  height:100vh;
+  background:#0e0016;
+  color:#fff;
+  font-family:Arial;
+}
+.hidden{display:none}
+
+.layout{
+  display:grid;
+  grid-template-columns:260px 1fr 360px;
+  height:100vh;
+}
+
+/* SOL */
+#leftMenu{
+  background:#12001f;
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.menuBtn{
+  padding:12px;
+  background:#7a3cff;
+  border:none;
+  border-radius:8px;
+  color:#fff;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* ORTA */
+.center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.card{
+  background:rgba(0,0,0,.6);
+  padding:40px;
+  border-radius:16px;
+  width:420px;
+  text-align:center;
+}
+.big{
+  font-size:26px;
+  padding:22px;
+}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:6px;
+  border:none;
+}
+
+/* SAĞ */
+#sidePanel{
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.panel{
+  background:rgba(0,0,0,.5);
+  padding:10px;
+  border-radius:10px;
+}
+#chatMessages{
+  flex:1;
+  overflow-y:auto;
+  max-height:200px;
+}
+
+/* POPUP */
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+.popupBox{
+  background:#1a002b;
+  padding:20px;
+  border-radius:14px;
+  width:360px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- SOL -->
+<div id="leftMenu" class="hidden">
+  <button class="menuBtn" onclick="openMarket()">🛒 Market</button>
+  <button class="menuBtn" onclick="openCasino()">🎰 Casino</button>
+</div>
+
+<!-- ORTA -->
+<div class="center">
+  <div class="card" id="auth">
+    <h2>Giriş / Kayıt</h2>
+    <input id="username" placeholder="Kullanıcı Adı">
+    <input id="password" type="password" placeholder="Şifre">
+    <button onclick="register()">Kayıt Ol</button>
+    <button onclick="login()">Giriş Yap</button>
+    <p id="authMsg"></p>
+  </div>
+
+  <div class="card hidden" id="game">
+    <h2 id="score">Altın: 0</h2>
+    <h3 id="power">Tıklama Gücü: 1</h3>
+    <button class="big" onclick="clickScore()">🖱️ TIKLA</button>
+    <button onclick="logout()">Çıkış</button>
+  </div>
+</div>
+
+<!-- SAĞ -->
+<div id="sidePanel" class="hidden">
+  <div class="panel">
+    <h3>🏆 İlk 5</h3>
+    <ul id="board"></ul>
+  </div>
+  <div class="panel">
+    <h3>💬 Chat</h3>
+    <div id="chatMessages"></div>
+    <input id="chatInput" placeholder="Mesaj yaz">
+    <button onclick="sendMsg()">Gönder</button>
+  </div>
+</div>
+
+</div>
+
+<!-- MARKET -->
+<div id="market" class="popup">
+  <div class="popupBox">
+    <h2>🛒 Market</h2>
+    <p id="marketInfo"></p>
+    <button onclick="buyUpgrade()">Tıklama Gücü Artır</button>
+    <button onclick="closeMarket()">Kapat</button>
+  </div>
+</div>
+
+<!-- CASINO -->
+<div id="casino" class="popup">
+  <div class="popupBox">
+    <h2>🪙 Yazı – Tura</h2>
+    <input id="bet" type="number" placeholder="Bahis miktarı">
+    <button onclick="playCoin('yazi')">Yazı</button>
+    <button onclick="playCoin('tura')">Tura</button>
+    <p id="coinInfo"></p>
+    <button onclick="closeCasino()">Kapat</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase,ref,set,push,onValue,runTransaction,get }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
+  authDomain:"click-game-2de2f.firebaseapp.com",
+  databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com",
+  projectId:"click-game-2de2f"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
+
+const authDiv=document.getElementById("auth");
+const gameDiv=document.getElementById("game");
+const sidePanel=document.getElementById("sidePanel");
+const leftMenu=document.getElementById("leftMenu");
+
+let currentUser=null;
+let usernameGlobal="";
+
+/* EKRAN */
+function showLogin(){
+  authDiv.classList.remove("hidden");
+  gameDiv.classList.add("hidden");
+  sidePanel.classList.add("hidden");
+  leftMenu.classList.add("hidden");
+}
+function showGame(){
+  authDiv.classList.add("hidden");
+  gameDiv.classList.remove("hidden");
+  sidePanel.classList.remove("hidden");
+  leftMenu.classList.remove("hidden");
+}
+
+/* AUTH */
+window.register=async()=>{
+  if(!username.value||!password.value) return;
+  const snap=await get(ref(db,"usernames/"+username.value));
+  if(snap.exists()){
+    authMsg.innerText="Bu kullanıcı adı alınmış";
+    return;
+  }
+  const r=await createUserWithEmailAndPassword(auth,username.value+"@c.local",password.value);
+  await set(ref(db,"users/"+r.user.uid),{
+    username:username.value,
+    score:0,
+    power:1,
+    price:50
+  });
+  await set(ref(db,"usernames/"+username.value),r.user.uid);
+};
+
+window.login=()=>signInWithEmailAndPassword(
+  auth,username.value+"@c.local",password.value
+);
+
+window.logout=()=>signOut(auth);
+
+/* SESSION */
+onAuthStateChanged(auth,u=>{
+  if(u){
+    currentUser=u;
+    showGame();
+    onValue(ref(db,"users/"+u.uid),s=>{
+      const d=s.val();
+      score.innerText="Altın: "+Math.floor(d.score);
+      power.innerText="Tıklama Gücü: "+d.power;
+      marketInfo.innerText=`Fiyat: ${d.price} | +1 Güç`;
+      usernameGlobal=d.username;
+    });
+  }else{
+    currentUser=null;
+    showLogin();
+  }
+});
+
+/* CLICK */
+window.clickScore=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+  d.score+=d.power;
+  return d;
+});
+
+/* MARKET */
+window.openMarket=()=>market.style.display="flex";
+window.closeMarket=()=>market.style.display="none";
+
+window.buyUpgrade=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+  if(d.score<d.price) return d;
+  d.score-=d.price;
+  d.power+=1;
+  d.price=Math.floor(d.price*1.15);
+  return d;
+});
+
+/* SCOREBOARD */
+onValue(ref(db,"users"),s=>{
+  board.innerHTML="";
+  Object.values(s.val()||{})
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,5)
+    .forEach(u=>{
+      board.innerHTML+=`<li>${u.username}: ${Math.floor(u.score)}</li>`;
+    });
+});
+
+/* CHAT + /temizle */
+onValue(ref(db,"chat"),s=>{
+  chatMessages.innerHTML="";
+  Object.values(s.val()||{}).forEach(m=>{
+    chatMessages.innerHTML+=`${m.user}: ${m.text}<br>`;
+  });
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+});
+window.sendMsg=()=>{
+  const msg=chatInput.value.trim();
+  if(!msg) return;
+  if(msg==="/temizle"){
+    set(ref(db,"chat"),null);
+    chatInput.value="";
+    return;
+  }
+  push(ref(db,"chat"),{user:usernameGlobal,text:msg});
+  chatInput.value="";
+};
+
+/* CASINO – YAZI TURA */
+window.openCasino=()=>casino.style.display="flex";
+window.closeCasino=()=>casino.style.display="none";
+
+window.playCoin=(choice)=>{
+  const amount=parseInt(bet.value);
+  if(!amount||amount<=0) return;
+  const result=Math.random()<0.5?"yazi":"tura";
+
+  runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+    if(d.score<amount) return d;
+    d.score-=amount;
+    if(choice===result) d.score+=amount*2;
+    coinInfo.innerText=`Sonuç: ${result.toUpperCase()} | ${choice===result?"Kazandın":"Kaybettin"}`;
+    return d;
+  });
+};
+</script>
+
+</body>
+</html>
