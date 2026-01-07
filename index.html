@@ -2,37 +2,21 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Tıklamaca</title>
-
+<title>Oyna Kral</title>
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  height:100vh;
-  background:#0e0016;
-  color:#fff;
-  font-family:Arial;
-}
-.hidden{display:none}
+body{margin:0;height:100vh;background:#0e0016;color:#fff;font-family:Arial;}
 .center{display:flex;justify-content:center;align-items:center;}
 .card{background:rgba(0,0,0,.6);padding:40px;border-radius:16px;width:420px;text-align:center;}
 .big{font-size:26px;padding:22px;}
 input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:none;cursor:pointer;}
-
-/* LAYOUT */
 #gameRoot{display:none;height:100vh;display:grid;grid-template-columns:260px 1fr 360px;}
-
-/* SOL */
 #leftMenu{background:#12001f;padding:10px;display:flex;flex-direction:column;gap:10px;}
-.menuBtn{padding:12px;background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;border-radius:8px;border:none;}
-
-/* SAĞ */
+.menuBtn{padding:12px;background:#7a3cff;color:#fff;font-weight:bold;border-radius:8px;}
 #sidePanel{padding:10px;display:flex;flex-direction:column;gap:10px;}
 .panel{background:rgba(0,0,0,.5);padding:10px;border-radius:10px;}
 #chatMessages{flex:1;overflow-y:auto;max-height:200px;}
-
-/* POPUP */
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:999;}
+.popup{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;}
 .popupBox{background:#1a002b;padding:20px;border-radius:14px;width:360px;text-align:center;}
 </style>
 </head>
@@ -44,33 +28,28 @@ input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:non
     <h2>Giriş / Kayıt</h2>
     <input id="username" placeholder="Kullanıcı Adı">
     <input id="password" type="password" placeholder="Şifre">
-    <button onclick="register()">Kayıt Ol</button>
-    <button onclick="login()">Giriş Yap</button>
+    <button id="registerBtn">Kayıt Ol</button>
+    <button id="loginBtn">Giriş Yap</button>
     <p id="authMsg"></p>
   </div>
 </div>
 
-<!-- OYUN ROOT -->
+<!-- GAME -->
 <div id="gameRoot">
-
-  <!-- SOL -->
   <div id="leftMenu">
-    <button class="menuBtn" onclick="openMarket()">🛒 Market</button>
-    <button class="menuBtn" onclick="openCasino()">🎰 Casino</button>
-    <button class="menuBtn" onclick="openCases()">🗃️ Kasalar</button>
+    <button class="menuBtn" id="marketBtn">🛒 Market</button>
+    <button class="menuBtn" id="casinoBtn">🎰 Casino</button>
   </div>
 
-  <!-- ORTA -->
   <div class="center">
-    <div class="card" id="game">
+    <div class="card">
       <h2 id="score">Altın: 0</h2>
       <h3 id="power">Tıklama Gücü: 1</h3>
-      <button class="big" onclick="clickScore()">🖱️ TIKLA</button>
-      <button onclick="logout()">Çıkış</button>
+      <button class="big" id="clickBtn">🖱️ TIKLA</button>
+      <button id="logoutBtn">Çıkış</button>
     </div>
   </div>
 
-  <!-- SAĞ -->
   <div id="sidePanel">
     <div class="panel">
       <h3>🏆 İlk 5</h3>
@@ -80,23 +59,20 @@ input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:non
       <h3>💬 Chat</h3>
       <div id="chatMessages"></div>
       <input id="chatInput" placeholder="Mesaj yaz">
-      <button onclick="sendMsg()">Gönder</button>
+      <button id="sendBtn">Gönder</button>
     </div>
   </div>
-
 </div>
 
 <!-- MARKET -->
 <div id="market" class="popup">
   <div class="popupBox">
     <h2>🛒 Market</h2>
-    <p id="powerInfo">Tıklama Gücü: Fiyat 100</p>
-    <button onclick="buyPower()">Tıklama Gücü Artır</button>
-
-    <p id="autoClickInfo">Oto Click: Fiyat 250 <span id="autoClickIcon">⚙️</span></p>
-    <button onclick="buyAutoClick()">Oto Click Al</button>
-
-    <button onclick="closeMarket()">Kapat</button>
+    <p id="powerInfo"></p>
+    <button id="buyPowerBtn">Tıklama Gücü Artır</button>
+    <p id="autoClickInfo"></p>
+    <button id="buyAutoClickBtn">Oto Click Al</button>
+    <button id="closeMarketBtn">Kapat</button>
   </div>
 </div>
 
@@ -104,22 +80,11 @@ input,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:non
 <div id="casino" class="popup">
   <div class="popupBox">
     <h2>🪙 Yazı – Tura</h2>
-    <input id="bet" type="number" placeholder="Bahis miktarı">
-    <button onclick="playCoin('yazi')">Yazı</button>
-    <button onclick="playCoin('tura')">Tura</button>
+    <input id="bet" type="number" placeholder="Bahis">
+    <button id="yaziBtn">Yazı</button>
+    <button id="turaBtn">Tura</button>
     <p id="coinInfo"></p>
-    <button onclick="closeCasino()">Kapat</button>
-  </div>
-</div>
-
-<!-- KASALAR -->
-<div id="cases" class="popup">
-  <div class="popupBox">
-    <h2>🗃️ Kasalar</h2>
-    <p>Kasaları aç ve bonus kazan!</p>
-    <button onclick="openCase()">Kasa Aç</button>
-    <div id="inventory"></div>
-    <button onclick="closeCases()">Kapat</button>
+    <button id="closeCasinoBtn">Kapat</button>
   </div>
 </div>
 
@@ -128,154 +93,114 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getDatabase,ref,set,push,onValue,runTransaction,get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// FIREBASE
 const firebaseConfig={
   apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
   authDomain:"click-game-2de2f.firebaseapp.com",
   databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com",
   projectId:"click-game-2de2f"
 };
+
 const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
+const firebaseAuth=getAuth(app);
 const db=getDatabase(app);
 
-// DOM
 const authDiv=document.getElementById("auth");
 const gameRoot=document.getElementById("gameRoot");
-const marketDiv=document.getElementById("market");
-const casinoDiv=document.getElementById("casino");
-const casesDiv=document.getElementById("cases");
 
 let currentUser=null;
 let usernameGlobal="";
-let autoClickLevel=0;
-let autoClickInterval = null;
-let autoClickPrice=250;
 let powerPrice=100;
+let autoClickLevel=0;
+let autoClickPrice=250;
+let autoClickInterval=null;
 
-// SHOW/HIDE
-function showLogin(){ authDiv.style.display="flex"; gameRoot.style.display="none"; marketDiv.style.display="none"; casinoDiv.style.display="none"; casesDiv.style.display="none"; }
-function showGame(){ authDiv.style.display="none"; gameRoot.style.display="grid"; }
-
-// AUTH
-window.register=async()=>{
+registerBtn.onclick=async()=>{
   if(!username.value||!password.value) return;
   const snap=await get(ref(db,"usernames/"+username.value));
-  if(snap.exists()){ authMsg.innerText="Bu kullanıcı adı alınmış"; return; }
-  const r=await createUserWithEmailAndPassword(auth,username.value+"@c.local",password.value);
-  await set(ref(db,"users/"+r.user.uid),{username:username.value,score:0,power:1,price:powerPrice,autoClick:0});
+  if(snap.exists()) return authMsg.innerText="Kullanıcı adı alınmış";
+  const r=await createUserWithEmailAndPassword(firebaseAuth,username.value+"@c.local",password.value);
+  await set(ref(db,"users/"+r.user.uid),{username:username.value,score:0,power:1,price:100,autoClick:0});
   await set(ref(db,"usernames/"+username.value),r.user.uid);
 };
-window.login=()=>signInWithEmailAndPassword(auth,username.value+"@c.local",password.value);
-window.logout=()=>signOut(auth);
 
-// SESSION
-onAuthStateChanged(auth,user=>{
-  if(user){
-    currentUser=user;
-    showGame();
-    // AUTO CLICK
-    onValue(ref(db,"users/"+user.uid),s=>{
-      const d=s.val();
-      score.innerText="Altın: "+Math.floor(d.score);
-      power.innerText="Tıklama Gücü: "+d.power;
-      powerPrice = d.price || 100;
-      autoClickLevel = d.autoClick || 0;
-      autoClickPrice = Math.floor(250 * Math.pow(1.15, autoClickLevel));
-      updateMarketUI();
-      usernameGlobal=d.username;
-      // Auto click interval
-      if(autoClickInterval) clearInterval(autoClickInterval);
-      if(autoClickLevel>0){
-        autoClickInterval = setInterval(()=>runTransaction(ref(db,"users/"+user.uid),d=>{
-          d.score+=autoClickLevel;
-          return d;
-        }),1000);
-      }
-    });
-  }else{
-    currentUser=null;
-    showLogin();
+loginBtn.onclick=()=>signInWithEmailAndPassword(firebaseAuth,username.value+"@c.local",password.value);
+logoutBtn.onclick=()=>signOut(firebaseAuth);
+
+onAuthStateChanged(firebaseAuth,user=>{
+  if(!user){
+    authDiv.style.display="flex";
+    gameRoot.style.display="none";
+    return;
   }
+  currentUser=user;
+  authDiv.style.display="none";
+  gameRoot.style.display="grid";
+
+  onValue(ref(db,"users/"+user.uid),s=>{
+    const d=s.val(); if(!d) return;
+    score.innerText="Altın: "+Math.floor(d.score);
+    power.innerText="Tıklama Gücü: "+d.power;
+    usernameGlobal=d.username;
+    powerPrice=d.price;
+    autoClickLevel=d.autoClick;
+    autoClickPrice=Math.floor(250*Math.pow(1.15,autoClickLevel));
+    powerInfo.innerText=`Tıklama Gücü Fiyat: ${powerPrice}`;
+    autoClickInfo.innerText=`Oto Click Fiyat: ${autoClickPrice}`;
+
+    if(autoClickInterval) clearInterval(autoClickInterval);
+    if(autoClickLevel>0){
+      autoClickInterval=setInterval(()=>{
+        runTransaction(ref(db,"users/"+user.uid),d=>{
+          d.score+=autoClickLevel; return d;
+        });
+      },1000);
+    }
+  });
 });
 
-// CLICK
-window.clickScore=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-  d.score+=d.power;
-  return d;
+clickBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+  d.score+=d.power; return d;
 });
 
-// MARKET
-function updateMarketUI(){
-  powerInfo.innerText=`Tıklama Gücü: Fiyat ${powerPrice}`;
-  autoClickInfo.innerText=`Oto Click: Fiyat ${autoClickPrice}`;
-  // Icon renk
-  let icon="⚙️";
-  if(autoClickLevel>=1 && autoClickLevel<5) icon="⚙️🟤";
-  else if(autoClickLevel>=5 && autoClickLevel<25) icon="⚙️⚪";
-  else if(autoClickLevel>=25 && autoClickLevel<100) icon="⚙️🟡";
-  else if(autoClickLevel>=100 && autoClickLevel<250) icon="⚙️🔵";
-  else if(autoClickLevel>=250 && autoClickLevel<500) icon="⚙️⚪";
-  document.getElementById("autoClickIcon").innerText = icon;
-}
-window.openMarket=()=>{ if(currentUser) marketDiv.style.display="flex"; }
-window.closeMarket=()=>marketDiv.style.display="none";
+marketBtn.onclick=()=>market.style.display="flex";
+closeMarketBtn.onclick=()=>market.style.display="none";
+casinoBtn.onclick=()=>casino.style.display="flex";
+closeCasinoBtn.onclick=()=>casino.style.display="none";
 
-window.buyPower=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+buyPowerBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
   if(d.score<powerPrice) return d;
-  d.score-=powerPrice;
-  d.power+=1;
-  powerPrice = Math.floor(powerPrice*1.1);
-  d.price=powerPrice;
-  return d;
-});
-window.buyAutoClick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-  if(d.score<autoClickPrice) return d;
-  d.score-=autoClickPrice;
-  autoClickLevel+=1;
-  d.autoClick=autoClickLevel;
-  autoClickPrice = Math.floor(autoClickPrice*1.15);
+  d.score-=powerPrice; d.power++;
+  d.price=Math.floor(powerPrice*1.1);
   return d;
 });
 
-// CASINO
-window.openCasino=()=>{ if(currentUser) casinoDiv.style.display="flex"; }
-window.closeCasino=()=>casinoDiv.style.display="none";
-window.playCoin=(choice)=>{
-  const amount=parseInt(bet.value);
-  if(!amount||amount<=0) return;
-  const result=Math.random()<0.5?"yazi":"tura";
+buyAutoClickBtn.onclick=()=>runTransaction(ref(db,"users/"+currentUser.uid),d=>{
+  if(d.score<autoClickPrice) return d;
+  d.score-=autoClickPrice; d.autoClick++;
+  return d;
+});
+
+yaziBtn.onclick=()=>coin("yazi");
+turaBtn.onclick=()=>coin("tura");
+
+function coin(c){
+  const bet=parseInt(betInput.value||bet.value);
   runTransaction(ref(db,"users/"+currentUser.uid),d=>{
-    if(d.score<amount) return d;
-    d.score-=amount;
-    if(choice===result) d.score+=amount*2;
-    coinInfo.innerText=`Sonuç: ${result.toUpperCase()} | ${choice===result?"Kazandın":"Kaybettin"}`;
+    if(d.score<bet) return d;
+    d.score-=bet;
+    const r=Math.random()<0.5?"yazi":"tura";
+    if(r===c) d.score+=bet*2;
+    coinInfo.innerText=`Sonuç: ${r}`;
     return d;
   });
-};
-
-// KASALAR / ENVANTER
-let inventory=[];
-window.openCases=()=>{ if(currentUser) casesDiv.style.display="flex"; updateInventory(); }
-window.closeCases=()=>casesDiv.style.display="none";
-
-function openCase(){
-  const reward = (Math.random()*4+1).toFixed(2); // 1x -5x
-  inventory.push(reward);
-  updateInventory();
-}
-function updateInventory(){
-  inventoryDiv = document.getElementById("inventory");
-  inventoryDiv.innerHTML = "Envanter: " + inventory.join(", ");
 }
 
-// SCOREBOARD + CHAT
 onValue(ref(db,"users"),s=>{
   board.innerHTML="";
-  Object.values(s.val()||{}).sort((a,b)=>b.score-a.score).slice(0,5).forEach(u=>{
-    board.innerHTML+=`<li>${u.username}: ${Math.floor(u.score)}</li>`;
-  });
+  Object.values(s.val()||{}).sort((a,b)=>b.score-a.score).slice(0,5)
+  .forEach(u=>board.innerHTML+=`<li>${u.username}: ${Math.floor(u.score)}</li>`);
 });
+
 onValue(ref(db,"chat"),s=>{
   chatMessages.innerHTML="";
   Object.values(s.val()||{}).forEach(m=>{
@@ -283,11 +208,10 @@ onValue(ref(db,"chat"),s=>{
   });
   chatMessages.scrollTop=chatMessages.scrollHeight;
 });
-window.sendMsg=()=>{
-  const msg=chatInput.value.trim();
-  if(!msg) return;
-  if(msg==="/temizle"){ set(ref(db,"chat"),null); chatInput.value=""; return; }
-  push(ref(db,"chat"),{user:usernameGlobal,text:msg});
+
+sendBtn.onclick=()=>{
+  if(!chatInput.value) return;
+  push(ref(db,"chat"),{user:usernameGlobal,text:chatInput.value});
   chatInput.value="";
 };
 </script>
