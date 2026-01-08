@@ -1,356 +1,257 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>OynaKral</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;height:100vh;background:#0e0016;color:#fff;font-family:Arial;overflow:hidden;}
-.hidden{display:none!important}
-.center{display:flex;justify-content:center;align-items:center}
-.card{background:rgba(0,0,0,.65);padding:40px;border-radius:18px;width:420px;text-align:center;}
-input,button{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:none;}
-button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
-#gameRoot{height:100vh;display:grid;grid-template-columns:220px 1fr 300px;}
-#leftMenu{background:#12001f;padding:10px;display:flex;flex-direction:column;gap:10px;}
-#sidePanel{padding:10px;display:flex;flex-direction:column;gap:10px;}
-.panel{background:rgba(0,0,0,.5);padding:10px;border-radius:10px;}
-#chatMessages{max-height:200px;overflow-y:auto;}
-.popup{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;}
-.popupBox{background:#1a002b;padding:25px;border-radius:18px;width:380px;text-align:center;}
-#rplaceRoot{height:100vh;display:grid;grid-template-columns:180px 1fr 300px;grid-template-rows:calc(100vh - 60px) 60px;}
-#rLeft{background:#12001f;padding:10px;}
-#rCenter{background:#222;overflow:auto;display:flex;justify-content:center;align-items:flex-start;}
-#canvasWrap{background:#eee;width:1200px;height:1200px;overflow:auto;}
-#canvas{display:grid;grid-template-columns:repeat(100,12px);}
-.pixel{width:12px;height:12px;background:#fff;cursor:pointer;} /* gri çizgi yok */
-#rChat{background:#12001f;padding:10px;display:flex;flex-direction:column;}
-#rMsgs{flex:1;overflow-y:auto}
-#rBottom{grid-column:1/4;background:#1a002b;display:flex;align-items:center;gap:15px;padding:10px;}
-#rBottom input[type=color]{width:40px;height:40px;padding:0;border:none;}
-#profileDisplay{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:10px;}
-#profileDisplay img{width:40px;height:40px;border-radius:50%;border:2px solid #fff;}
-#profileDisplay span{font-weight:bold;}
-</style>
+    <meta charset="UTF-8">
+    <title>OynaKral - Final Fix</title>
+    <style>
+        *{box-sizing:border-box; outline: none;}
+        body{margin:0;height:100vh;background:#0e0016;color:#fff;font-family:sans-serif;overflow:hidden;}
+        .hidden{display:none!important}
+        .center{display:flex;justify-content:center;align-items:center;height: 100vh;}
+        .card{background:rgba(25, 0, 50, 0.95);padding:30px;border-radius:18px;width:400px;text-align:center;border:1px solid #7a3cff;box-shadow: 0 0 15px #7a3cff55;}
+        input,button{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;}
+        button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
+        button:hover{background:#9b6dff;}
+        
+        #gameRoot, #voleybolRoot {height:100vh; display:grid; grid-template-columns:220px 1fr 300px;}
+        #rplaceRoot {height:100vh; display:grid; grid-template-columns:220px 1fr 300px; grid-template-rows:1fr 75px;}
+        .sidebar {background:#12001f; padding:15px; border-right:1px solid #333; display:flex; flex-direction:column; gap:10px;}
+        .chat-sidebar {background:#0a0014; padding:15px; border-left:1px solid #333; display:flex; flex-direction:column;}
+        .chat-msgs {flex:1; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; font-size:13px; margin-bottom:10px;}
+
+        #rCenter {background:#1a1a1a; overflow:auto; position:relative;}
+        #canvasWrap {background:#fff; width:2400px; height:2400px;}
+        #canvas {display:grid; grid-template-columns:repeat(200, 12px); width:2400px; height:2400px;}
+        .pixel {width:12px; height:12px; border:0.1px solid #eee; background:#fff;}
+        #rBottom {grid-column:1/4; background:#12001f; border-top:2px solid #7a3cff; display:flex; align-items:center; justify-content:center; gap:30px;}
+        
+        .popup{position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:10000;}
+        .kick-btn {background:#ff3c3c; padding:2px 6px; font-size:11px; border-radius:4px; margin-left:8px; width:auto; cursor:pointer;}
+        #vCanvas {background:linear-gradient(#1a002b, #3e1e5e); border-bottom:8px solid #2ecc71; border-radius:10px;}
+    </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div class="center" id="authDiv">
-  <div class="card">
-    <h1>👑 OynaKral</h1>
-    <input id="username" placeholder="Kullanıcı Adı">
-    <input id="password" type="password" placeholder="Şifre">
-    <button id="registerBtn">Kayıt Ol</button>
-    <button id="loginBtn">Giriş Yap</button>
-    <p id="authMsg"></p>
-  </div>
-</div>
+<div class="center" id="authDiv"><div class="card"><h1>👑 OynaKral</h1><input id="username" placeholder="Kullanıcı Adı"><input id="password" type="password" placeholder="Şifre"><button id="loginBtn">Giriş Yap</button><button id="registerBtn" style="background:#444">Kayıt Ol</button></div></div>
 
-<!-- GAME SELECT -->
 <div class="center hidden" id="gameSelect">
-  <div class="card">
-    <h2>🎮 Oyun Seç</h2>
-    <button id="startClicker">🖱️ Tıklamaca</button>
-    <button id="startRplace">🎨 r/place</button>
-    <button id="logoutBtn">Çıkış</button>
-  </div>
-  <div id="profileDisplay">
-    <img id="avatar" src="https://i.pravatar.cc/40">
-    <span id="profileName"></span>
-  </div>
-</div>
-
-<!-- TIKLAMACA -->
-<div id="gameRoot" class="hidden">
-  <div id="leftMenu">
-    <button id="marketBtn">🛒 Market</button>
-    <button id="casinoBtn">🎰 Casino</button>
-    <button id="backMenuBtn">⬅ Oyun Menüsü</button>
-  </div>
-  <div class="center">
     <div class="card">
-      <h2 id="score">Altın: 0</h2>
-      <h3 id="power">Tıklama Gücü: 1</h3>
-      <button id="clickBtn">🖱️ TIKLA</button>
+        <h2>🎮 Oyun Seç</h2>
+        <button id="btnC">🖱️ Tıklamaca</button>
+        <button id="btnR">🎨 r/place</button>
+        <button id="btnV">🏐 Voleybol</button>
+        <button id="logoutBtn" style="background:#cc2b2b; margin-top:20px;">Çıkış Yap</button>
     </div>
-  </div>
-  <div id="sidePanel">
-    <div class="panel">
-      <h3>🏆 Scoreboard</h3>
-      <ul id="board"></ul>
-    </div>
-    <div class="panel">
-      <h3>💬 Chat</h3>
-      <div id="chatMessages"></div>
-      <input id="chatInput">
-      <button id="sendBtn">Gönder</button>
-    </div>
-  </div>
 </div>
 
-<!-- MARKET -->
-<div id="market" class="popup">
-  <div class="popupBox">
-    <h3>🛒 Market</h3>
-    <p id="marketInfo"></p>
-    <button id="buyPowerBtn">SATIN AL</button>
-    <button onclick="market.style.display='none'">Kapat</button>
-  </div>
+<div id="gameRoot" class="hidden">
+    <div class="sidebar">
+        <button onclick="document.getElementById('marketPop').style.display='flex'">🛒 Market</button>
+        <button onclick="document.getElementById('casinoPop').style.display='flex'">🎰 Casino</button>
+        <button class="backMenu">⬅ Menü</button>
+    </div>
+    <div class="center"><div class="card"><h2 id="scoreDisp">Altın: 0</h2><h3 id="powerDisp">Güç: 1</h3><button id="clickBtn" style="height:120px; font-size:40px;">🖱️</button></div></div>
+    <div class="chat-sidebar"><h3>🏆 Sıralama</h3><ul id="board" style="padding:0; list-style:none; color:#3cff7a; font-size:14px; margin-bottom:10px;"></ul><div class="chat-msgs" id="cMsgs"></div><input id="cIn" placeholder="Mesaj..."><button id="cSend">Gönder</button></div>
 </div>
 
-<!-- CASINO -->
-<div id="casino" class="popup">
-  <div class="popupBox">
-    <h3>🎰 Yazı Tura</h3>
-    <input id="bet" type="number" placeholder="Bahis">
-    <button onclick="coin('yazi')">Yazı</button>
-    <button onclick="coin('tura')">Tura</button>
-    <p id="coinInfo"></p>
-    <button onclick="casino.style.display='none'">Kapat</button>
-  </div>
-</div>
-
-<!-- RPLACE -->
 <div id="rplaceRoot" class="hidden">
-  <div id="rLeft">
-    <button id="rBack">⬅ Oyun Menüsü</button>
-    <div style="margin-top:20px;">🟢 Aktif Oyuncular: <span id="online">0</span></div>
-  </div>
-  <div id="rCenter">
-    <div id="canvasWrap">
-      <div id="canvas"></div>
-    </div>
-  </div>
-  <div id="rChat">
-    <h3>💬 r/place Chat</h3>
-    <div id="rMsgs"></div>
-    <input id="rInput">
-    <button id="rSend">Gönder</button>
-  </div>
-  <div id="rBottom">
-    <input type="color" id="color" value="#ff0000">
-    <div>Boya: <span id="paint">30</span>/30</div>
-  </div>
+    <div class="sidebar"><button class="backMenu">⬅ Menü</button><div style="color:#7a3cff; font-weight:bold;">🟢 Aktif: <span id="rCount">0</span></div><div id="onlineList"></div></div>
+    <div id="rCenter"><div id="canvasWrap"><div id="canvas"></div></div></div>
+    <div class="chat-sidebar"><h3>💬 Chat</h3><div class="chat-msgs" id="rMsgs"></div><input id="rIn" placeholder="Mesaj..."><button id="rSend">Gönder</button></div>
+    <div id="rBottom"><input type="color" id="color" value="#ff0000" style="width:30px; height:30px;"><div style="font-size:18px;">🎨 Boya: <span id="paintText">30</span>/30</div></div>
 </div>
+
+<div id="voleybolRoot" class="hidden">
+    <div class="sidebar"><button class="backMenu">⬅ Menü</button><div id="vLobby"><button id="vCreate">Oda Kur</button><input id="vJoinCode" placeholder="Kod"><button id="vJoin">Katıl</button></div><div id="vInfo" class="hidden"><h3 id="vDispCode">-</h3><div id="vPlayerList"></div><button id="vStart" class="hidden" style="background:#28a745">BAŞLAT</button><h2 id="vScore">0 - 0</h2></div></div>
+    <div class="center"><canvas id="vCanvas" width="800" height="400" class="hidden"></canvas></div>
+    <div class="chat-sidebar hidden" id="vChatSide"><h3>💬 Oda Chat</h3><div class="chat-msgs" id="vMsgs"></div><input id="vIn" placeholder="Mesaj..."><button id="vSend">Gönder</button></div>
+</div>
+
+<div id="marketPop" class="popup"><div class="card"><h3>🛒 Market</h3><p id="marketInfo"></p><button id="buyPowerBtn">GELİŞTİR</button><button onclick="document.getElementById('marketPop').style.display='none'">Kapat</button></div></div>
+<div id="casinoPop" class="popup"><div class="card"><h3>🎰 Yazı Tura</h3><input id="bet" type="number" placeholder="Bahis"><button id="btnYazi">YAZI</button><button id="btnTura">TURA</button><p id="coinInfo"></p><button onclick="document.getElementById('casinoPop').style.display='none'">Kapat</button></div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase,ref,set,push,onValue,runTransaction,get,remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getDatabase,ref,set,push,onValue,runTransaction,get,remove,update,onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const app=initializeApp({
-  apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
-  authDomain:"click-game-2de2f.firebaseapp.com",
-  databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com"
-});
-const auth=getAuth(app);
-const db=getDatabase(app);
+const config={apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",authDomain:"click-game-2de2f.firebaseapp.com",databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com"};
+const app=initializeApp(config); const auth=getAuth(app); const db=getDatabase(app);
 
-let user=null,userData=null;
+let user=null, userData=null, curRoom=null, isHost=false, roomData=null;
 
-/* ===== AUTH ===== */
-registerBtn.onclick = async () => {
-  const n = username.value, p = password.value;
-  if (!n || !p) { authMsg.innerText="Kullanıcı adı ve şifre boş olamaz!"; return; }
-  if ((await get(ref(db,"usernames/"+n))).exists()) { authMsg.innerText="Kullanıcı zaten kayıtlı!"; return; }
-  const c = await createUserWithEmailAndPassword(auth,n+"@oynakral.com",p);
-  await set(ref(db,"users/"+c.user.uid),{username:n,score:0,power:1,price:100});
-  await set(ref(db,"usernames/"+n),c.user.uid);
-  authMsg.innerText="Kayıt başarılı! 🎉";
-};
-
-loginBtn.onclick = async () => {
-  const email=username.value+"@oynakral.com";
-  const pass=password.value;
-  if(!username.value||!password.value){ authMsg.innerText="Kullanıcı adı ve şifre boş olamaz!"; return; }
-  try{ await signInWithEmailAndPassword(auth,email,pass); authMsg.innerText="Giriş başarılı! 🎉"; } 
-  catch(err){ authMsg.innerText="Giriş başarısız: "+err.message; }
-};
-
-logoutBtn.onclick=()=>signOut(auth);
-
-/* ===== ON AUTH STATE ===== */
-onAuthStateChanged(auth,u=>{
-  if(!u){
-    authDiv.classList.remove("hidden");
-    gameSelect.classList.add("hidden");
-    gameRoot.classList.add("hidden");
-    rplaceRoot.classList.add("hidden");
-    return;
-  }
-
-  user=u;
-
-  get(ref(db,"bannedUsers/"+u.uid)).then(s=>{
-    if(s.exists()){
-      authDiv.classList.remove("hidden");
-      authMsg.innerText="Yasaklandınız!";
-      gameSelect.classList.add("hidden");
-      gameRoot.classList.add("hidden");
-      rplaceRoot.classList.add("hidden");
-      return;
-    }
-  });
-
-  authDiv.classList.add("hidden");
-  gameSelect.classList.remove("hidden");
-
-  onValue(ref(db,"users/"+u.uid),s=>{
-    userData=s.val();
-    if(!userData) return;
-    score.innerText="Altın: "+userData.score;
-    power.innerText="Tıklama Gücü: "+userData.power;
-    marketInfo.innerText=`Güç +1 | Fiyat ${userData.price}`;
-    profileName.innerText=userData.username;
-  });
-});
-
-/* ===== GAME SELECT ===== */
-startClicker.onclick=()=>{gameSelect.classList.add("hidden");gameRoot.classList.remove("hidden");};
-startRplace.onclick=()=>{
-  gameSelect.classList.add("hidden");
-  rplaceRoot.classList.remove("hidden");
-  set(ref(db,"rplace/online/"+user.uid),userData.username);
-};
-backMenuBtn.onclick=()=>{gameRoot.classList.add("hidden");gameSelect.classList.remove("hidden");};
-rBack.onclick=()=>{
-  rplaceRoot.classList.add("hidden");
-  gameSelect.classList.remove("hidden");
-  remove(ref(db,"rplace/online/"+user.uid));
-};
-
-/* ===== CLICKER ===== */
-clickBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{d.score+=d.power;return d});
-marketBtn.onclick=()=>market.style.display="flex";
-buyPowerBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{
-  if(d.score<d.price)return d;
-  d.score-=d.price; d.power++; d.price=Math.floor(d.price*1.1); return d;
-});
-
-/* ===== CASINO ===== */
-casinoBtn.onclick=()=>casino.style.display="flex";
-window.coin=(c)=>{
-  const b=+bet.value;
-  runTransaction(ref(db,"users/"+user.uid),d=>{
-    if(d.score<b)return d;
-    d.score-=b;
-    const r=Math.random()<0.5?"yazi":"tura";
-    if(r===c)d.score+=b*2;
-    coinInfo.innerText=r===c?"Kazandın":"Kaybettin";
-    return d;
-  });
-};
-
-/* ===== SCOREBOARD ===== */
-onValue(ref(db,"users"),s=>{
-  board.innerHTML="";
-  Object.values(s.val()||{}).sort((a,b)=>b.score-a.score)
-  .slice(0,5).forEach(u=>{
-    board.innerHTML+=`<li>${u.username}: ${u.score}</li>`;
-  });
-});
-
-/* ===== CHAT & KOMUTLAR ===== */
-function updateChat(chatEl, chatPath){
-  onValue(ref(db, chatPath), s=>{
-    chatEl.innerHTML = "";
-    const messages = s.val() || {};
-    Object.values(messages).forEach(m=>{
-      chatEl.innerHTML += `${m.user}: ${m.text}<br>`;
+/* --- AUTH & GLOBAL --- */
+onAuthStateChanged(auth, u => {
+    if(!u) { authDiv.classList.remove("hidden"); return; }
+    user=u; authDiv.classList.add("hidden"); gameSelect.classList.remove("hidden");
+    onValue(ref(db,"users/"+u.uid), s => {
+        userData=s.val(); if(!userData) return;
+        if(userData.kicked) { update(ref(db,"users/"+user.uid),{kicked:false}); location.reload(); }
+        scoreDisp.innerText="Altın: "+(userData.score || 0);
+        powerDisp.innerText="Güç: "+(userData.power || 1);
+        paintText.innerText=userData.paint||0;
+        marketInfo.innerText=`Güç +1 | Fiyat: ${userData.price || 100}`;
     });
-    chatEl.scrollTop = chatEl.scrollHeight;
-  });
-}
-updateChat(chatMessages, "chat/tiklamaca");
-updateChat(rMsgs, "chat/rplace");
+});
+loginBtn.onclick=()=>signInWithEmailAndPassword(auth,username.value+"@oynakral.com",password.value).catch(e=>alert("Hata: "+e.message));
+registerBtn.onclick=async()=>{
+    const n=username.value, p=password.value;
+    const c=await createUserWithEmailAndPassword(auth,n+"@oynakral.com",p);
+    await set(ref(db,"users/"+c.user.uid),{username:n,score:0,power:1,price:100,paint:30,kicked:false});
+};
+logoutBtn.onclick=()=>signOut(auth);
+document.querySelectorAll(".backMenu").forEach(b=>b.onclick=()=>location.reload());
 
-function sendChat(msg, chatPath){
-  if(!msg || !userData) return;
+/* --- TIKLAMACA --- */
+clickBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{if(d){d.score=(d.score||0)+(d.power||1);}return d});
+buyPowerBtn.onclick=()=>{
+    runTransaction(ref(db,"users/"+user.uid),d=>{
+        if(!d) return d;
+        let p = d.price || 100;
+        if((d.score || 0) >= p){ d.score -= p; d.power = (d.power || 1) + 1; d.price = Math.floor(p * 1.3); }
+        else { alert("Yetersiz Altın!"); }
+        return d;
+    });
+};
+const playCoin=(choice)=>{
+    const b = parseInt(bet.value); if(!b || b<=0) return;
+    runTransaction(ref(db,"users/"+user.uid),d=>{
+        if(!d || (d.score||0)<b) return d;
+        d.score -= b; const res = Math.random() < 0.5 ? "yazi" : "tura";
+        if(res === choice){ d.score += b * 2; coinInfo.innerText="KAZANDIN! Sonuç: "+res.toUpperCase(); }
+        else { coinInfo.innerText="KAYBETTİN! Sonuç: "+res.toUpperCase(); }
+        return d;
+    });
+};
+btnYazi.onclick=()=>playCoin("yazi"); btnTura.onclick=()=>playCoin("tura");
 
-  get(ref(db, "mutedUsers/" + user.uid)).then(s=>{
-    if(s.exists()) return; // susturulmuşsa gönderemez
-
-    // remobaba komutları
-    if(userData.username === "remobaba"){
-      if(msg.startsWith("/sustur ")){
-        const target = msg.split(" ")[1];
-        if(!target) return;
-        get(ref(db,"usernames/"+target)).then(s=>{
-          if(s.exists()){
-            set(ref(db,"mutedUsers/"+s.val()), true);
-            push(ref(db, chatPath), { user:"Sistem", text:`${target} susturuldu ✅` });
-          }
-        });
-        return chatInput.value="", rInput.value="";
-      }
-      if(msg.startsWith("/yasakla ")){
-        const target = msg.split(" ")[1];
-        if(!target) return;
-        get(ref(db,"usernames/"+target)).then(s=>{
-          if(s.exists()){
-            set(ref(db,"bannedUsers/"+s.val()), true);
-            push(ref(db, chatPath), { user:"Sistem", text:`${target} yasaklandı ❌` });
-            if(target === userData.username) signOut(auth);
-          }
-        });
-        return chatInput.value="", rInput.value="";
-      }
-      if(msg.startsWith("/affet ")){
-        const target = msg.split(" ")[1];
-        if(!target) return;
-        get(ref(db,"usernames/"+target)).then(s=>{
-          if(s.exists()){
-            remove(ref(db,"mutedUsers/"+s.val()));
-            remove(ref(db,"bannedUsers/"+s.val()));
-            push(ref(db, chatPath), { user:"Sistem", text:`${target} affedildi ⚪` });
-          }
-        });
-        return chatInput.value="", rInput.value="";
-      }
-      if(msg==="/temizle"){
-        remove(ref(db, chatPath));
-        push(ref(db, chatPath), { user:"Sistem", text:`Sohbet temizlendi 🧹` });
-        return chatInput.value="", rInput.value="";
-      }
-    }
-
-    // normal mesaj
-    push(ref(db, chatPath), { user: userData.username, text: msg });
-    chatInput.value=""; rInput.value="";
-  });
-}
-sendBtn.onclick = ()=>sendChat(chatInput.value, "chat/tiklamaca");
-rSend.onclick   = ()=>sendChat(rInput.value, "chat/rplace");
-
-/* ===== RPLACE ===== */
-let paint=30;
-const paintEl=document.getElementById("paint");
-setInterval(()=>{if(paint<30){paint++;paintEl.innerText=paint}},5000);
-
-for(let y=0;y<100;y++)for(let x=0;x<100;x++){
-  const p=document.createElement("div");
-  p.className="pixel";
-  p.dataset.id=`${x}_${y}`;
-  p.onclick=()=>{
-    if(paint<=0)return;
-    paint--;paintEl.innerText=paint;
-    set(ref(db,"rplace/pixels/"+p.dataset.id),color.value);
-  };
-  canvas.appendChild(p);
-}
-onValue(ref(db,"rplace/pixels"),s=>{
-  const d=s.val()||{};
-  document.querySelectorAll(".pixel").forEach(px=>{
-    if(d[px.dataset.id]) px.style.background=d[px.dataset.id];
-  });
+onValue(ref(db,"users"), s => {
+    const d=s.val(); if(!d) return;
+    const arr = Object.values(d).sort((a,b)=>b.score-a.score).slice(0,5);
+    board.innerHTML = arr.map(u=>`<li>${u.username}: ${u.score}</li>`).join("");
 });
 
-/* ===== RPLACE AKTİF OYUNCU SAYISI ===== */
-const onlineEl=document.getElementById("online");
-onValue(ref(db,"rplace/online"),s=>{
-  onlineEl.innerText=Object.keys(s.val()||{}).length;
+/* --- R/PLACE (BOYAMA VE LİSTE FİX) --- */
+const cvs=document.getElementById("canvas");
+for(let i=0; i<40000; i++){
+    const p=document.createElement("div"); p.className="pixel";
+    p.onclick=()=>{ 
+        if(userData.paint > 0){
+            runTransaction(ref(db,"users/"+user.uid+"/paint"), pt => (pt || 0) - 1);
+            set(ref(db,"rplace/pixels/"+i), color.value);
+        } else { alert("Boyan bitti! Bekle doluyor..."); }
+    };
+    cvs.appendChild(p);
+}
+onValue(ref(db,"rplace/pixels"), s => {
+    const d=s.val(); if(!d) return;
+    Object.keys(d).forEach(k => { if(cvs.children[k]) cvs.children[k].style.background = d[k]; });
 });
+
+function trackRplace(){
+    const oRef=ref(db,"rplace/online/"+user.uid);
+    set(oRef,{name:userData.username, id:user.uid}); onDisconnect(oRef).remove();
+    onValue(ref(db,"rplace/online"), s => {
+        const d=s.val()||{}; const ks=Object.keys(d);
+        let count = 0; onlineList.innerHTML="";
+        ks.forEach(k=>{
+            const p=d[k];
+            if(p.name && p.name !== "undefined"){
+                count++;
+                let kBtn=(userData.username==="remobaba" && p.id!==user.uid)?`<button class="kick-btn" onclick="window.kickPlayer('${p.id}')">AT</button>`:"";
+                onlineList.innerHTML += `<div style="margin-bottom:5px">👤 ${p.name} ${kBtn}</div>`;
+            }
+        });
+        rCount.innerText = count;
+    });
+}
+window.kickPlayer=(tid)=>update(ref(db,"users/"+tid),{kicked:true});
+
+/* --- CHAT SİSTEMİ (TIKRİR FIX) --- */
+function syncChat(el, path){
+    onValue(ref(db,path), s => {
+        el.innerHTML=""; const d=s.val(); if(!d) return;
+        Object.values(d).forEach(m => el.innerHTML += `<div><b>${m.u}:</b> ${m.t}</div>`);
+        el.scrollTop = el.scrollHeight;
+    });
+}
+function chatSend(inp, path){
+    const msg = inp.value; if(!msg) return;
+    if(msg==="/temizle" && userData.username==="remobaba"){ remove(ref(db,path)); inp.value=""; return; }
+    push(ref(db,path), {u:userData.username, t:msg}); inp.value="";
+}
+cSend.onclick=()=>chatSend(cIn, "chat/tik");
+rSend.onclick=()=>chatSend(rIn, "chat/rpl");
+vSend.onclick=()=>chatSend(vIn, `vchat/${curRoom}`);
+syncChat(cMsgs, "chat/tik"); syncChat(rMsgs, "chat/rpl");
+
+/* --- VOLEYBOL (TEMASSIZ HAREKET FIX) --- */
+const vCtx=vCanvas.getContext("2d");
+let vKeys={}; window.onkeydown=e=>vKeys[e.code]=true; window.onkeyup=e=>vKeys[e.code]=false;
+let vVy=0, vOnGround=true;
+
+vCreate.onclick=()=>{
+    const rid=Math.floor(1000+Math.random()*9000); curRoom=rid; isHost=true;
+    set(ref(db,`rooms/${rid}`),{host:userData.username, status:"waiting", p1x:150, p1y:380, p2x:650, p2y:380, bx:400, by:180, bvx:0, bvy:0, s1:0, s2:0});
+    vInit(rid);
+};
+vJoin.onclick=()=>{
+    const rid=vJoinCode.value; get(ref(db,`rooms/${rid}`)).then(s=>{
+        if(s.exists() && !s.val().guest){ curRoom=rid; isHost=false; update(ref(db,`rooms/${rid}`),{guest:userData.username}); vInit(rid); }
+    });
+};
+function vInit(rid){
+    vLobby.classList.add("hidden"); vInfo.classList.remove("hidden"); vCanvas.classList.remove("hidden"); vChatSide.classList.remove("hidden");
+    vDispCode.innerText="ODA: "+rid; syncChat(vMsgs, `vchat/${rid}`);
+    onValue(ref(db,`rooms/${rid}`), s => {
+        roomData=s.val(); if(!roomData) return;
+        if(roomData.status==="playing"){ vStart.classList.add("hidden"); vRender(roomData); }
+        else{ vPlayerList.innerHTML=`${roomData.host} vs ${roomData.guest||'?'}`; if(isHost&&roomData.guest)vStart.classList.remove("hidden"); }
+        vScore.innerText=`${roomData.s1} - ${roomData.s2}`;
+    });
+}
+vStart.onclick=()=>update(ref(db,`rooms/${curRoom}`),{status:"playing"});
+
+setInterval(()=>{
+    if(!curRoom || !roomData || roomData.status!=="playing") return;
+    let mx=isHost?roomData.p1x:roomData.p2x, my=isHost?roomData.p1y:roomData.p2y;
+    if(vKeys['KeyA']) mx-=12; if(vKeys['KeyD']) mx+=12;
+    if(vKeys['KeyW'] && vOnGround){ vVy=-16; vOnGround=false; }
+    if(!vOnGround){ vVy+=0.8; my+=vVy; if(my>=380){my=380; vVy=0; vOnGround=true;} }
+    if(isHost){ if(mx<40)mx=40; if(mx>365)mx=365; } else { if(mx<435)mx=435; if(mx>760)mx=760; }
+
+    if(isHost){
+        let nbx=roomData.bx+roomData.bvx, nby=roomData.by+roomData.bvy, nbvx=roomData.bvx, nbvy=roomData.bvy;
+        if(nbvx!==0 || nbvy!==0) nbvy+=0.35; // Sadece hareket edince yerçekimi başlar
+        
+        const d1=Math.hypot(nbx-roomData.p1x, nby-(roomData.p1y-20));
+        const d2=Math.hypot(nbx-roomData.p2x, nby-(roomData.p2y-20));
+        if(d1<45){ nbvy=-11; nbvx=(nbx-roomData.p1x)*0.5; }
+        if(d2<45){ nbvy=-11; nbvx=(nbx-roomData.p2x)*0.5; }
+        
+        if(nbx>385 && nbx<415 && nby>250){ nbvx*=-1; nbx=(nbx<400)?384:416; } // Direk
+        if(nbx<15 || nbx>785) nbvx*=-1; if(nby<15) nbvy*=-1;
+        
+        if(nby>395){
+            const s1w=nbx>400; update(ref(db,`rooms/${curRoom}`),{s1:roomData.s1+(s1w?1:0), s2:roomData.s2+(s1w?0:1), bx:s1w?600:200, by:180, bvx:0, bvy:0});
+        } else {
+            update(ref(db,`rooms/${curRoom}`),{bx:nbx, by:nby, bvx:nbvx, bvy:nbvy, p1x:mx, p1y:my});
+        }
+    } else { update(ref(db,`rooms/${curRoom}/p2x`), mx); update(ref(db,`rooms/${curRoom}/p2y`), my); }
+}, 30);
+
+function vRender(d){
+    vCtx.clearRect(0,0,800,400); vCtx.fillStyle="#fff"; vCtx.fillRect(397,250,6,150);
+    vCtx.fillStyle="#ff3c7a"; vCtx.beginPath(); vCtx.arc(d.p1x,d.p1y,35,Math.PI,0); vCtx.fill();
+    vCtx.fillStyle="#3cff7a"; vCtx.beginPath(); vCtx.arc(d.p2x,d.p2y,35,Math.PI,0); vCtx.fill();
+    vCtx.fillStyle="#f1c40f"; vCtx.beginPath(); vCtx.arc(d.bx,d.by,13,0,Math.PI*2); vCtx.fill();
+}
+
+/* --- NAV --- */
+btnC.onclick=()=>{gameSelect.classList.add("hidden"); gameRoot.classList.remove("hidden");};
+btnR.onclick=()=>{gameSelect.classList.add("hidden"); rplaceRoot.classList.remove("hidden"); trackRplace();};
+btnV.onclick=()=>{gameSelect.classList.add("hidden"); voleybolRoot.classList.remove("hidden");};
+setInterval(()=> {if(user && (userData?.paint||0)<30) runTransaction(ref(db,"users/"+user.uid+"/paint"),p=>(p||0)+1);}, 5000);
 </script>
 </body>
 </html>
