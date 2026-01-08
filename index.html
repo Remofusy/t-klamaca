@@ -3,175 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OynaKral Pro - Performans Sürümü</title>
+    <title>OynaKral - Remobaba VIP (Lite)</title>
     <style>
-        /* PERFORMANS ODAKLI TASARIM - GÖLGE/BLUR YOK */
-        :root { 
-            --primary: #4a148c; 
-            --secondary: #7b1fa2; 
-            --bg: #000000; 
-            --glass: #121212; 
-            --border: #222; 
-            --success: #1b5e20;
-            --danger: #b71c1c;
-            --warning: #f57f17;
-        }
-        
+        /* PERFORMANS İÇİN SADELEŞTİRİLMİŞ CSS */
         * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
-        body { height: 100vh; background: var(--bg); color: #fff; font-family: 'Arial', sans-serif; overflow: hidden; }
+        
+        body {
+            height: 100vh;
+            background: #111; /* Düz siyah/gri arka plan */
+            color: #ddd;
+            font-family: sans-serif; /* Standart font */
+            overflow: hidden;
+        }
+
         .hidden { display: none !important; }
 
-        /* ÜST DUYURU BANDI */
-        #duyuruPanel { 
-            position: fixed; top: 0; left: 0; right: 0; 
-            background: var(--primary); padding: 12px; z-index: 99999; 
-            font-weight: bold; border-bottom: 1px solid #fff; text-align: center; display: none; 
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        /* ANA YAPI */
-        .layout { height: 100vh; display: grid; grid-template-columns: 260px 1fr 300px; }
-        .sidebar { background: #0a0a0a; padding: 20px; border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
-        .sidebar-right { border-left: 1px solid var(--border); border-right: none; }
+        .card {
+            background: #222; /* Yarı saydamlık kaldırıldı */
+            padding: 20px;
+            border-radius: 4px; /* Yuvarlaklık azaltıldı */
+            width: 400px;
+            text-align: center;
+            border: 2px solid #555; /* Parlayan kenarlık yerine düz çizgi */
+            /* box-shadow kaldırıldı */
+        }
 
-        .card { background: #111; border: 1px solid var(--border); border-radius: 4px; padding: 15px; text-align: center; }
-        .chat-area { flex: 1; background: #050505; border-radius: 4px; padding: 10px; overflow-y: auto; border: 1px solid var(--border); font-size: 13px; margin-bottom: 10px; }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            font-size: 14px;
+            background: #333;
+            color: #fff;
+            /* transition kaldırıldı */
+        }
 
-        /* BUTONLAR */
-        .btn-pro { background: var(--primary); color: white; padding: 12px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; text-transform: uppercase; }
-        .btn-pro:hover { background: var(--secondary); }
+        button {
+            background: #4a2b96;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #666;
+        }
+
+        button:hover {
+            background: #5c3bb3;
+            /* transform (zıplama) kaldırıldı */
+        }
+
+        .admin-name { 
+            color: #d559ff !important; 
+            font-weight: bold; 
+            /* text-shadow kaldırıldı */
+        }
+
+        .user-name { 
+            color: #9e6eff; 
+            font-weight: bold; 
+        }
+
+        #gameRoot, #voleybolRoot, #rplaceRoot {
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+        }
+
+        .sidebar {
+            background: #1a1a1a;
+            padding: 15px;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+
+        .chat-sidebar {
+            background: #1a1a1a;
+            padding: 10px;
+            border-left: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-msgs {
+            flex: 1;
+            overflow-y: auto;
+            background: #222;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 13px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+
+        #rCenter { background: #333; overflow: auto; position: relative; }
+        #canvasWrap { background: #fff; width: 2400px; height: 2400px; }
+        #canvas { display: grid; grid-template-columns: repeat(200, 12px); width: 2400px; height: 2400px; }
         
-        /* OYUN ARAÇLARI */
-        #vCanvas { background: #000; border: 1px solid var(--border); }
-        #canvas { display: grid; grid-template-columns: repeat(200, 12px); width: 2400px; height: 2400px; background: #fff; image-rendering: pixelated; }
         .pixel { width: 12px; height: 12px; cursor: crosshair; }
 
-        /* MODAL */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 50000; }
-        input { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid var(--border); color: #fff; border-radius: 4px; margin-bottom: 5px; }
+        .online-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px;
+            background: #252525;
+            margin-bottom: 4px;
+            border: 1px solid #333;
+        }
+        .dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; /* shadow kaldırıldı */ }
 
-        .admin-name { color: #ff00ff; font-weight: bold; }
-        .user-name { color: #ab47bc; font-weight: bold; }
-        .online-user { padding: 5px; border-bottom: 1px solid #111; font-size: 12px; color: #4caf50; }
+        #vCanvas {
+            background: #2a2a2a; /* Gradyan kaldırıldı */
+            border-bottom: 5px solid #2ecc71;
+        }
+
+        #toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #444;
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid #777;
+            z-index: 999999;
+            display: none;
+            font-weight: bold;
+        }
+
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50000;
+        }
     </style>
 </head>
 <body>
 
-<div id="duyuruPanel">📢 <span id="duyuruMsg"></span></div>
+<div id="toast">Bildirim Mesajı</div>
 
-<div id="authDiv" style="display:flex; justify-content:center; align-items:center; height:100vh;">
-    <div class="card" style="width: 320px;">
-        <h1 style="color:var(--secondary); margin-bottom:15px;">OynaKral</h1>
+<div class="center" id="authDiv">
+    <div class="card">
+        <h1 style="color: #d559ff; margin-bottom: 10px;">👑 OynaKral</h1>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Remobaba Lite Sürüm</p>
         <input id="username" placeholder="Kullanıcı Adı">
         <input id="password" type="password" placeholder="Şifre">
-        <button class="btn-pro" id="loginBtn" style="width:100%; margin-top:10px;">GİRİŞ</button>
-        <button class="btn-pro" id="registerBtn" style="width:100%; margin-top:5px; background:#222;">KAYIT OL</button>
+        <button id="loginBtn">Giriş Yap</button>
+        <button id="registerBtn" style="background:#333">Yeni Hesap Oluştur</button>
     </div>
 </div>
 
-<div id="gameSelect" class="hidden" style="display:flex; justify-content:center; align-items:center; height:100vh;">
-    <div class="card" style="width: 500px;">
-        <h2 style="margin-bottom:25px;">OYUN MODU SEÇİN</h2>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-            <button class="btn-pro" id="btnC">🖱️ TIKLA</button>
-            <button class="btn-pro" id="btnR" style="background:var(--success)">🎨 RPLACE</button>
-            <button class="btn-pro" id="btnV" style="background:var(--warning)">🏐 VOLEYBOL</button>
-        </div>
-        <button class="btn-pro" id="logoutBtn" style="margin-top:20px; background:#333; width:100%;">ÇIKIŞ</button>
+<div class="center hidden" id="gameSelect">
+    <div class="card">
+        <h2 style="margin-bottom: 15px;">🎮 Hoş Geldin!</h2>
+        <button id="btnC" style="background: #2980b9;">🖱️ Tıklamaca</button>
+        <button id="btnR" style="background: #27ae60;">🎨 Rplace</button>
+        <button id="btnV" style="background: #f39c12;">🏐 Voleybol</button>
+        <button id="logoutBtn" style="background:#c0392b; margin-top:30px;">Güvenli Çıkış</button>
     </div>
 </div>
 
-<div id="gameRoot" class="layout hidden">
+<div id="gameRoot" class="hidden">
     <div class="sidebar">
-        <button class="btn-pro" onclick="location.reload()">⬅ MENÜ</button>
-        <div class="card">
-            <small>BAKİYE</small>
-            <h2 id="scoreDisp" style="color:var(--warning)">0</h2>
-            <p id="powerDisp" style="font-size:11px;">GÜÇ: 1</p>
+        <button onclick="document.getElementById('marketPop').style.display='flex'">🛒 Market</button>
+        <button onclick="document.getElementById('casinoPop').style.display='flex'">🎰 Casino (Yazı-Tura)</button>
+        <button class="backMenu" style="background: #444;">⬅ Ana Menü</button>
+    </div>
+    <div class="center">
+        <div class="card" style="width: 500px;">
+            <h1 id="scoreDisp" style="font-size: 40px; color: #f1c40f;">Altın: 0</h1>
+            <h3 id="powerDisp" style="color: #3498db; margin-bottom: 20px;">Tıklama Gücü: 1</h3>
+            <button id="clickBtn" style="height:200px; width:200px; font-size:80px; border-radius: 50%; border: 5px solid #4a2b96; background: #222;">🖱️</button>
         </div>
-        <button class="btn-pro" id="openMarket">🛒 MARKET</button>
-        <button class="btn-pro" id="openCasino">🎰 CASINO</button>
     </div>
-    <div style="display:flex; justify-content:center; align-items:center;">
-        <button id="clickBtn" style="width:220px; height:220px; border-radius:50%; background:#0a0a0a; border:6px solid var(--primary); font-size:70px; cursor:pointer; color:white;">🖱️</button>
-    </div>
-    <div class="sidebar sidebar-right">
-        <h3 style="text-align:center;">🏆 LİDERLER</h3>
-        <div id="board" class="chat-area" style="max-height:140px;"></div>
-        <h3 style="text-align:center;">💬 SOHBET</h3>
-        <div class="chat-area" id="cMsgs"></div>
-        <div style="display:flex; gap:5px;"><input id="cIn" placeholder="Yaz..."><button id="cSend" class="btn-pro">🚀</button></div>
-    </div>
-</div>
-
-<div id="rplaceRoot" class="layout hidden">
-    <div class="sidebar">
-        <button class="btn-pro" onclick="location.reload()">⬅ MENÜ</button>
-        <div class="card" style="border-color: var(--success);">
-            <small>AKTİF OYUNCULAR</small>
-            <h2 id="rCount">0</h2>
-        </div>
-        <p style="font-size:11px; color:#555; text-align:center;">OYUNCU LİSTESİ</p>
-        <div id="onlineList" class="chat-area" style="background:#080808;"></div>
-    </div>
-    <div style="overflow:auto; background:#1a1a1a;"><div id="canvas"></div></div>
-    <div class="sidebar sidebar-right">
-        <div class="chat-area" id="rMsgs"></div>
-        <div style="display:flex; gap:5px;"><input id="rIn" placeholder="Rplace sohbet..."><button id="rSend" class="btn-pro">🚀</button></div>
-        <div class="card" style="margin-top:10px;">
-            <input type="color" id="color" value="#ff0000" style="height:45px; cursor:pointer;">
-            <p style="margin-top:8px;">KALAN BOYA: <b id="paintText" style="color:var(--secondary)">30</b></p>
+    <div class="chat-sidebar">
+        <h3 style="text-align: center; color: #f1c40f;">🏆 Zenginler Listesi</h3>
+        <ul id="board" style="padding:15px 0; list-style:none;"></ul>
+        <div class="chat-msgs" id="cMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="cIn" placeholder="Mesaj yaz..." style="margin:0;">
+            <button id="cSend" style="width:70px; margin:0;">🚀</button>
         </div>
     </div>
 </div>
 
-<div id="voleybolRoot" class="layout hidden">
+<div id="rplaceRoot" class="hidden">
     <div class="sidebar">
-        <button class="btn-pro" onclick="location.reload()">⬅ MENÜ</button>
+        <button class="backMenu" style="background: #444;">⬅ Menü</button>
+        <div style="color:#9e6eff; font-weight:bold; font-size: 20px; margin-top: 10px;">🟢 Aktif: <span id="rCount">0</span></div>
+        <div id="onlineList" style="margin-top: 20px;"></div>
+    </div>
+    <div id="rCenter"><div id="canvasWrap"><div id="canvas"></div></div></div>
+    <div class="chat-sidebar">
+        <h3 style="text-align: center; color: #27ae60;">💬 Küresel Sohbet</h3>
+        <div class="chat-msgs" id="rMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="rIn" placeholder="Buraya yaz..." style="margin:0;">
+            <button id="rSend" style="width:70px; margin:0;">🚀</button>
+        </div>
+    </div>
+    <div id="rBottom" style="grid-column: 1/4; display: flex; align-items: center; justify-content: center; background: #1a1a1a; border-top: 2px solid #555; gap: 30px; height: 80px;">
+        <input type="color" id="color" value="#ff0000" style="width:50px; height:50px; border:none; background:none;">
+        <div style="font-size:20px; font-weight: bold;">🎨 Kalan Boya: <span id="paintText" style="color:#9e6eff;">30</span> / 30</div>
+    </div>
+</div>
+
+<div id="voleybolRoot" class="hidden">
+    <div class="sidebar">
+        <button class="backMenu" style="background: #444;">⬅ Menü</button>
         <div id="vLobby">
-            <button id="vCreate" class="btn-pro" style="background:var(--success); width:100%;">ODA KUR</button>
-            <input id="vJoinCode" placeholder="ODA KODU" style="margin:10px 0; text-align:center;">
-            <button id="vJoin" class="btn-pro" style="width:100%;">KATIL</button>
+            <button id="vCreate" style="background: #27ae60;">Oda Oluştur</button>
+            <input id="vJoinCode" placeholder="Oda Kodu Gir">
+            <button id="vJoin" style="background: #2980b9;">Odaya Katıl</button>
         </div>
         <div id="vInfo" class="hidden">
-            <div class="card" style="background:var(--primary);">
-                <small>KOD</small><h2 id="vCodeDisp">0000</h2>
-            </div>
-            <h1 id="vScore" style="text-align:center; margin:20px 0; font-size:40px;">0 - 0</h1>
-            <div id="vPlayerList" class="chat-area" style="height:120px;"></div>
-            <button id="vStart" class="btn-pro hidden" style="background:var(--success); width:100%;">BAŞLAT</button>
+            <h3 id="vDispCode" style="color:#f39c12;">ODA: -</h3>
+            <div id="vPlayerList" style="padding:15px; background:#222; margin: 10px 0;"></div>
+            <button id="vStart" class="hidden" style="background:#2ecc71">OYUNU BAŞLAT</button>
+            <h2 id="vScore" style="margin-top:30px; color:#f1c40f; font-size:50px; text-align: center;">0 - 0</h2>
         </div>
     </div>
-    <div style="display:flex; justify-content:center; align-items:center;">
-        <canvas id="vCanvas" width="800" height="400" class="hidden"></canvas>
-    </div>
-    <div class="sidebar sidebar-right hidden" id="vChatSide">
-        <div class="chat-area" id="vMsgs"></div>
-        <div style="display:flex; gap:5px;"><input id="vIn" placeholder="Odaya yaz..."><button id="vSend" class="btn-pro">🚀</button></div>
+    <div class="center"><canvas id="vCanvas" width="800" height="400" class="hidden"></canvas></div>
+    <div class="chat-sidebar hidden" id="vChatSide">
+        <h3 style="text-align: center;">💬 Oda Sohbeti</h3>
+        <div class="chat-msgs" id="vMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="vIn" placeholder="Mesaj..." style="margin:0;">
+            <button id="vSend" style="width:70px; margin:0;">🚀</button>
+        </div>
     </div>
 </div>
 
-<div id="marketPop" class="modal">
-    <div class="card" style="width:280px;">
-        <h2>🛒 MARKET</h2>
-        <div style="margin:15px 0; padding:15px; background:#0a0a0a; border:1px solid var(--border);">
-            <p>Tıklama Gücü +1</p>
-            <b id="marketPrice" style="color:var(--warning)">100 Altın</b>
-        </div>
-        <button class="btn-pro" id="buyPowerBtn" style="width:100%;">SATIN AL</button>
-        <button class="btn-pro" onclick="document.getElementById('marketPop').style.display='none'" style="width:100%; margin-top:8px; background:#222;">KAPAT</button>
+<div id="marketPop" class="popup">
+    <div class="card">
+        <h2 style="color: #2ecc71;">🛒 Market</h2>
+        <p id="marketInfo" style="margin: 20px 0; font-size: 16px;"></p>
+        <button id="buyPowerBtn" style="background: #27ae60;">GELİŞTİR (+1 GÜÇ)</button>
+        <button onclick="document.getElementById('marketPop').style.display='none'" style="background:#444">Kapat</button>
     </div>
 </div>
 
-<div id="casinoPop" class="modal">
-    <div class="card" style="width:280px;">
-        <h2>🎰 CASINO</h2>
-        <input id="betAmount" type="number" placeholder="Bahis Miktarı" style="margin:15px 0;">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-            <button class="btn-pro" id="betYazi">YAZI</button>
-            <button class="btn-pro" id="betTura" style="background:#823100;">TURA</button>
+<div id="casinoPop" class="popup">
+    <div class="card">
+        <h2 style="color: #f1c40f;">🎰 Yazı-Tura Casino</h2>
+        <input id="betAmount" type="number" placeholder="Bahis miktarını girin">
+        <div style="display:flex; gap:15px; margin-top: 10px;">
+            <button id="betYazi" style="background: #2ecc71; height: 60px;">YAZI</button>
+            <button id="betTura" style="background: #e67e22; height: 60px;">TURA</button>
         </div>
-        <div id="casinoRes" style="margin-top:15px; font-weight:bold; height:20px;"></div>
-        <button class="btn-pro" onclick="document.getElementById('casinoPop').style.display='none'" style="width:100%; margin-top:10px; background:#222;">KAPAT</button>
+        <p id="casinoResult" style="margin-top:20px; font-weight:bold; font-size: 18px; min-height: 25px;"></p>
+        <button onclick="document.getElementById('casinoPop').style.display='none'" style="background:#444">Masadan Kalk</button>
+    </div>
+</div>
+
+<div id="resultPop" class="popup">
+    <div class="card">
+        <h1 id="resultTitle">OYUN BİTTİ</h1>
+        <p id="resultDesc" style="margin: 20px 0; font-size: 20px;"></p>
+        <button onclick="location.reload()" style="background: #4a2b96;">TAMAM</button>
     </div>
 </div>
 
@@ -190,200 +293,312 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    let user = null, userData = null, curRoom = null, isHost = false;
-    let lastAnnID = localStorage.getItem("remobaba_p_ann");
+    let user = null;
+    let userData = null;
+    let curRoom = null;
+    let isHost = false;
+    let roomData = null;
+    let gameEnded = false;
 
-    // --- TEMEL SİSTEM ---
+    function showNotify(msg) {
+        const t = document.getElementById("toast");
+        t.innerText = msg;
+        t.style.display = "block";
+        setTimeout(() => { t.style.display = "none"; }, 3000);
+    }
+
     onAuthStateChanged(auth, u => {
-        if (!u) { document.getElementById("authDiv").classList.remove("hidden"); return; }
+        if (!u) {
+            document.getElementById("authDiv").classList.remove("hidden");
+            document.getElementById("gameSelect").classList.add("hidden");
+            return;
+        }
         user = u;
         document.getElementById("authDiv").classList.add("hidden");
         document.getElementById("gameSelect").classList.remove("hidden");
 
         onValue(ref(db, "users/" + u.uid), s => {
-            userData = s.val(); if(!userData) return;
-            if(userData.kicked) { signOut(auth); location.reload(); }
-            document.getElementById("scoreDisp").innerText = Math.floor(userData.score || 0);
-            document.getElementById("powerDisp").innerText = "GÜÇ: " + (userData.power || 1);
-            document.getElementById("paintText").innerText = userData.paint || 0;
-            document.getElementById("marketPrice").innerText = (userData.price || 100) + " Altın";
-        });
-
-        onValue(ref(db, "global_duyuru"), s => {
-            const d = s.val();
-            if(d && d.id !== lastAnnID) {
-                const p = document.getElementById("duyuruPanel");
-                document.getElementById("duyuruMsg").innerText = d.msg;
-                p.style.display = "block";
-                setTimeout(() => { p.style.display="none"; lastAnnID=d.id; localStorage.setItem("remobaba_p_ann", d.id); }, 8000);
+            userData = s.val();
+            if (!userData) return;
+            if (userData.kicked) {
+                update(ref(db, "users/" + user.uid), { kicked: false });
+                signOut(auth);
+                location.reload();
             }
+            document.getElementById("scoreDisp").innerText = "Altın: " + (userData.score || 0);
+            document.getElementById("powerDisp").innerText = "Tıklama Gücü: " + (userData.power || 1);
+            document.getElementById("paintText").innerText = userData.paint || 0;
+            document.getElementById("marketInfo").innerText = `Mevcut Güç: ${userData.power} | Geliştirme Bedeli: ${userData.price || 100} Altın`;
         });
     });
 
-    // --- MARKET & CASINO ---
+    // CASINO
+    function handleCasino(choice) {
+        const bet = parseInt(document.getElementById("betAmount").value);
+        if (!bet || bet <= 0) { showNotify("Lütfen geçerli bir bahis gir!"); return; }
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (!d) return d;
+            if (d.score < bet) return undefined;
+            d.score -= bet;
+            return d;
+        }).then(result => {
+            if (!result.committed) { showNotify("Yetersiz Altın!"); return; }
+            const winResult = Math.random() < 0.5 ? "yazi" : "tura";
+            const isWin = winResult === choice;
+            const resEl = document.getElementById("casinoResult");
+            if (isWin) {
+                runTransaction(ref(db, "users/" + user.uid), d => { if (d) d.score += (bet * 2); return d; });
+                resEl.style.color = "#2ecc71";
+                resEl.innerText = "KAZANDIN! Sonuç: " + winResult.toUpperCase();
+            } else {
+                resEl.style.color = "#e74c3c";
+                resEl.innerText = "KAYBETTİN! Sonuç: " + winResult.toUpperCase();
+            }
+        });
+    }
+    document.getElementById("betYazi").onclick = () => handleCasino("yazi");
+    document.getElementById("betTura").onclick = () => handleCasino("tura");
+
+    // ADMIN KOMUTLARI
+    async function checkAdminCommands(val) {
+        if (userData.username !== "remobaba") return false;
+        const p = val.split(" ");
+        const cmd = p[0].toLowerCase();
+        const target = p[1];
+        if (cmd === "/temizle") {
+            await set(ref(db, "chat"), null);
+            await set(ref(db, "global_notif"), "Chat temizlendi (remobaba)");
+            return true;
+        }
+        const usersSnap = await get(ref(db, "users"));
+        const allUsers = usersSnap.val();
+        let targetId = null;
+        for (let id in allUsers) { if (allUsers[id].username === target) targetId = id; }
+        if (!targetId) return false;
+        if (cmd === "/yasakla") {
+            await update(ref(db, `users/${targetId}`), { kicked: true });
+            await set(ref(db, "global_notif"), `${target} yasaklandı (remobaba)`);
+        } else if (cmd === "/sustur") {
+            await update(ref(db, `users/${targetId}`), { muted: true });
+            await set(ref(db, "global_notif"), `${target} susturuldu (remobaba)`);
+        }
+        return true;
+    }
+
+    onValue(ref(db, "global_notif"), s => {
+        if (s.val()) { showNotify(s.val()); set(ref(db, "global_notif"), null); }
+    });
+
+    // CHAT
+    function setupChat(elId, path) {
+        onValue(ref(db, path), s => {
+            const el = document.getElementById(elId);
+            el.innerHTML = "";
+            const data = s.val();
+            if (!data) return;
+            Object.values(data).forEach(m => {
+                const nameClass = m.u === "remobaba" ? "admin-name" : "user-name";
+                el.innerHTML += `<div><b class="${nameClass}">${m.u}:</b> ${m.t}</div>`;
+            });
+            el.scrollTop = el.scrollHeight;
+        });
+    }
+
+    async function sendChatMessage(inpId, path) {
+        const inp = document.getElementById(inpId);
+        if (!inp.value) return;
+        if (userData.muted) { showNotify("Susturuldun!"); return; }
+        if (inp.value.startsWith("/")) { if (await checkAdminCommands(inp.value)) { inp.value = ""; return; } }
+        push(ref(db, path), { u: userData.username, t: inp.value });
+        inp.value = "";
+    }
+
+    document.getElementById("cSend").onclick = () => sendChatMessage("cIn", "chat/tik");
+    document.getElementById("rSend").onclick = () => sendChatMessage("rIn", "chat/rpl");
+    setupChat("cMsgs", "chat/tik");
+    setupChat("rMsgs", "chat/rpl");
+
+    // TIKLAMACA
+    document.getElementById("clickBtn").onclick = () => {
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (d) d.score = (d.score || 0) + (d.power || 1);
+            return d;
+        });
+    };
+
+    onValue(ref(db, "users"), s => {
+        const d = s.val(); if (!d) return;
+        const sorted = Object.values(d).sort((a, b) => b.score - a.score).slice(0, 5);
+        document.getElementById("board").innerHTML = sorted.map(u => {
+            const nCls = u.username === "remobaba" ? "admin-name" : "user-name";
+            return `<li style="margin-bottom:8px; background:#222; padding:8px; border-left: 3px solid #7a3cff;">
+                <b class="${nCls}">${u.username}</b>: ${u.score}
+            </li>`;
+        }).join("");
+    });
+
     document.getElementById("buyPowerBtn").onclick = () => {
         runTransaction(ref(db, "users/" + user.uid), d => {
-            if (d && d.score >= (d.price || 100)) {
-                d.score -= (d.price || 100);
-                d.power = (d.power || 1) + 1;
-                d.price = Math.floor((d.price || 100) * 1.8);
-            } else alert("Yetersiz altın!");
+            if (!d) return d;
+            let p = d.price || 100;
+            if (d.score >= p) { d.score -= p; d.power++; d.price = Math.floor(p * 1.5); }
             return d;
         });
     };
 
-    const runBet = (pick) => {
-        const amt = parseInt(document.getElementById("betAmount").value);
-        if(!amt || amt <= 0 || amt > userData.score) { alert("Geçersiz bahis!"); return; }
-        const res = Math.random() > 0.5 ? "yazi" : "tura";
-        runTransaction(ref(db, "users/" + user.uid), d => {
-            if(d) {
-                if(pick === res) { d.score += amt; document.getElementById("casinoRes").style.color="#4caf50"; document.getElementById("casinoRes").innerText = "KAZANDIN!"; }
-                else { d.score -= amt; document.getElementById("casinoRes").style.color="#f44336"; document.getElementById("casinoRes").innerText = "KAYBETTİN!"; }
-            }
-            return d;
-        });
-    };
-    document.getElementById("betYazi").onclick = () => runBet("yazi");
-    document.getElementById("betTura").onclick = () => runBet("tura");
+    // RPLACE MANTIĞI
+    const cvs = document.getElementById("canvas");
+    for (let i = 0; i < 40000; i++) {
+        const p = document.createElement("div");
+        p.className = "pixel";
+        p.onclick = () => {
+            if (userData.paint > 0) {
+                runTransaction(ref(db, `users/${user.uid}/paint`), c => (c || 0) - 1);
+                set(ref(db, `rplace/pixels/${i}`), document.getElementById("color").value);
+            } else { showNotify("Boya bekleyin..."); }
+        };
+        cvs.appendChild(p);
+    }
+    onValue(ref(db, "rplace/pixels"), s => {
+        const data = s.val(); if (!data) return;
+        Object.keys(data).forEach(k => { if (cvs.children[k]) cvs.children[k].style.background = data[k]; });
+    });
 
-    // --- VOLEYBOL ---
+    function startPresenceTracking() {
+        const myPresenceRef = ref(db, `rplace/online/${user.uid}`);
+        onDisconnect(myPresenceRef).remove();
+        set(myPresenceRef, { username: userData.username });
+        onValue(ref(db, "rplace/online"), s => {
+            const listEl = document.getElementById("onlineList");
+            const countEl = document.getElementById("rCount");
+            const allPlayers = s.val();
+            listEl.innerHTML = "";
+            if (!allPlayers) { countEl.innerText = "0"; return; }
+            const validPlayers = Object.values(allPlayers).filter(p => p.username && p.username !== "undefined");
+            countEl.innerText = validPlayers.length;
+            validPlayers.forEach(p => {
+                const nCls = p.username === "remobaba" ? "admin-name" : "user-name";
+                listEl.innerHTML += `<div class="online-user"><div class="dot"></div><span class="${nCls}">${p.username}</span></div>`;
+            });
+        });
+    }
+
+    // VOLEYBOL MANTIĞI
+    const vC = document.getElementById("vCanvas");
+    const ctx = vC.getContext("2d");
+    let keys = {};
+    window.onkeydown = e => keys[e.code] = true;
+    window.onkeyup = e => keys[e.code] = false;
+    let v_vy = 0, v_onG = true;
+
+    function vEnd(t, d) {
+        if (gameEnded) return;
+        gameEnded = true;
+        document.getElementById("resultTitle").innerText = t;
+        document.getElementById("resultDesc").innerText = d;
+        document.getElementById("resultPop").style.display = "flex";
+        if (curRoom) remove(ref(db, `rooms/${curRoom}`));
+    }
+
     document.getElementById("vCreate").onclick = () => {
         const id = Math.floor(1000 + Math.random() * 9000);
         curRoom = id; isHost = true;
-        set(ref(db, `rooms/${id}`), { host: userData.username, hostId: user.uid, s1:0, s2:0, bx:400, by:200, status:"open" });
-        onDisconnect(ref(db, `rooms/${id}`)).remove();
-        startVoley(id);
+        const rRef = ref(db, `rooms/${id}`);
+        set(rRef, { host: userData.username, hostId: user.uid, status: "waiting", p1x: 150, p1y: 380, p2x: 650, p2y: 380, bx: 400, by: 180, bvx: 0, bvy: 0, s1: 0, s2: 0 });
+        onDisconnect(rRef).remove();
+        initVolleyballRoom(id);
     };
 
     document.getElementById("vJoin").onclick = () => {
         const id = document.getElementById("vJoinCode").value;
         get(ref(db, `rooms/${id}`)).then(s => {
-            if(s.exists() && !s.val().guest) {
+            if (s.exists() && !s.val().guest) {
                 curRoom = id; isHost = false;
                 update(ref(db, `rooms/${id}`), { guest: userData.username, guestId: user.uid });
-                startVoley(id);
-            } else alert("Oda dolu veya yok!");
+                initVolleyballRoom(id);
+            }
         });
     };
 
-    function startVoley(id) {
+    function initVolleyballRoom(id) {
         document.getElementById("vLobby").classList.add("hidden");
         document.getElementById("vInfo").classList.remove("hidden");
-        document.getElementById("vCanvas").classList.remove("hidden");
+        vC.classList.remove("hidden");
         document.getElementById("vChatSide").classList.remove("hidden");
-        document.getElementById("vCodeDisp").innerText = id;
-
+        document.getElementById("vDispCode").innerText = "ODA: " + id;
+        setupChat("vMsgs", `vchat/${id}`);
         onValue(ref(db, `rooms/${id}`), s => {
-            const d = s.val(); if(!d) return;
-            document.getElementById("vScore").innerText = `${d.s1} - ${d.s2}`;
-            document.getElementById("vPlayerList").innerHTML = `<b>P1:</b> ${d.host}<br><b>P2:</b> ${d.guest || 'Bekleniyor...'}`;
-            if(isHost && d.guest) document.getElementById("vStart").classList.remove("hidden");
-            
-            const ctx = document.getElementById("vCanvas").getContext("2d");
-            ctx.clearRect(0,0,800,400);
-            ctx.fillStyle="#222"; ctx.fillRect(399, 220, 2, 180);
-            ctx.fillStyle="#ffeb3b"; ctx.beginPath(); ctx.arc(d.bx, d.by, 15, 0, Math.PI*2); ctx.fill();
-        });
-
-        onValue(ref(db, `vchat/${id}`), s => {
-            const el = document.getElementById("vMsgs"); el.innerHTML = "";
-            if(s.exists()) Object.values(s.val()).forEach(m => el.innerHTML += `<div><b>${m.u}:</b> ${m.t}</div>`);
-            el.scrollTop = el.scrollHeight;
-        });
-    }
-
-    // --- GENEL SOHBET & ADMİN ---
-    async function talk(inpId, path) {
-        const inp = document.getElementById(inpId); const m = inp.value.trim(); if(!m) return;
-        if(m.startsWith("/") && userData.username === "remobaba") {
-            const parts = m.split(" "); const cmd = parts[0].toLowerCase();
-            if(cmd === "/duyuru") set(ref(db, "global_duyuru"), { msg: m.replace("/duyuru","").trim(), id: Date.now().toString() });
-            if(cmd === "/temizle") remove(ref(db, path));
-            if(cmd === "/yasakla") {
-                const sn = await get(ref(db, "users"));
-                Object.keys(sn.val()).forEach(k => { if(sn.val()[k].username === parts[1]) update(ref(db, `users/${k}`), { kicked: true }); });
+            roomData = s.val();
+            if (!roomData) return;
+            if (roomData.status === "playing") {
+                document.getElementById("vStart").classList.add("hidden");
+                drawVolleyball(roomData);
+            } else {
+                document.getElementById("vPlayerList").innerHTML = `<b>P1:</b> ${roomData.host} <br> <b>P2:</b> ${roomData.guest || 'Bekleniyor...'}`;
+                if (isHost && roomData.guest) document.getElementById("vStart").classList.remove("hidden");
             }
-            inp.value = ""; return;
-        }
-        if(userData.muted) return;
-        push(ref(db, path), { u: userData.username, t: m }); inp.value = "";
+            document.getElementById("vScore").innerText = `${roomData.s1} - ${roomData.s2}`;
+        });
     }
 
-    // --- BUTON BAĞLANTILARI ---
-    document.getElementById("clickBtn").onclick = () => runTransaction(ref(db, "users/" + user.uid), d => { if(d) d.score += (d.power || 1); return d; });
+    document.getElementById("vStart").onclick = () => update(ref(db, `rooms/${curRoom}`), { status: "playing" });
+
+    setInterval(() => {
+        if (!curRoom || !roomData || roomData.status !== "playing" || gameEnded) return;
+        let mx = isHost ? roomData.p1x : roomData.p2x;
+        let my = isHost ? roomData.p1y : roomData.p2y;
+        if (keys['KeyA'] || keys['ArrowLeft']) mx -= 12;
+        if (keys['KeyD'] || keys['ArrowRight']) mx += 12;
+        if ((keys['KeyW'] || keys['ArrowUp']) && v_onG) { v_vy = -18; v_onG = false; }
+        if (!v_onG) { v_vy += 0.9; my += v_vy; if (my >= 380) { my = 380; v_vy = 0; v_onG = true; } }
+        if (isHost) { if (mx < 40) mx = 40; if (mx > 365) mx = 365; }
+        else { if (mx < 435) mx = 435; if (mx > 760) mx = 760; }
+        if (isHost) {
+            let nx = roomData.bx + roomData.bvx, ny = roomData.by + roomData.bvy, nvx = roomData.bvx, nvy = roomData.bvy;
+            if (nvx !== 0 || nvy !== 0) nvy += 0.4;
+            if (Math.hypot(nx - roomData.p1x, ny - (roomData.p1y - 20)) < 45) { nvy = -12; nvx = (nx - roomData.p1x) * 0.5; }
+            if (Math.hypot(nx - roomData.p2x, ny - (roomData.p2y - 20)) < 45) { nvy = -12; nvx = (nx - roomData.p2x) * 0.4; }
+            if (nx > 385 && nx < 415 && ny > 250) { nvx *= -1.2; nx = (nx < 400) ? 384 : 416; }
+            if (nx < 15 || nx > 785) nvx *= -1;
+            if (ny < 15) nvy *= -1;
+            if (ny > 395) {
+                const w = nx > 400;
+                update(ref(db, `rooms/${curRoom}`), { s1: roomData.s1 + (w ? 1 : 0), s2: roomData.s2 + (w ? 0 : 1), bx: w ? 600 : 200, by: 180, bvx: 0, bvy: 0 });
+            } else update(ref(db, `rooms/${curRoom}`), { bx: nx, by: ny, bvx: nvx, bvy: nvy, p1x: mx, p1y: my });
+        } else {
+            update(ref(db, `rooms/${curRoom}/p2x`), mx);
+            update(ref(db, `rooms/${curRoom}/p2y`), my);
+        }
+    }, 35);
+
+    function drawVolleyball(d) {
+        ctx.clearRect(0,0,800,400);
+        ctx.fillStyle="#fff"; ctx.fillRect(397, 250, 6, 150);
+        ctx.fillStyle="#ff3c7a"; ctx.beginPath(); ctx.arc(d.p1x, d.p1y, 35, Math.PI, 0); ctx.fill();
+        ctx.fillStyle="#3cff7a"; ctx.beginPath(); ctx.arc(d.p2x, d.p2y, 35, Math.PI, 0); ctx.fill();
+        ctx.fillStyle="#f1c40f"; ctx.beginPath(); ctx.arc(d.bx, d.by, 15, 0, Math.PI * 2); ctx.fill();
+    }
+
     document.getElementById("btnC").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("gameRoot").classList.remove("hidden"); };
+    document.getElementById("btnR").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("rplaceRoot").classList.remove("hidden"); startPresenceTracking(); };
     document.getElementById("btnV").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("voleybolRoot").classList.remove("hidden"); };
-    
-    document.getElementById("btnR").onclick = () => { 
-        document.getElementById("gameSelect").classList.add("hidden"); 
-        document.getElementById("rplaceRoot").classList.remove("hidden"); 
-        // Aktiflik Kaydı
-        const onlineRef = ref(db, "online_rplace/" + user.uid);
-        set(onlineRef, { name: userData.username });
-        onDisconnect(onlineRef).remove();
+    document.querySelectorAll(".backMenu").forEach(b => b.onclick = () => location.reload());
+    document.getElementById("vSend").onclick = () => sendChatMessage("vIn", `vchat/${curRoom}`);
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
+
+    document.getElementById("loginBtn").onclick = () => {
+        const email = document.getElementById("username").value + "@oynakral.com";
+        signInWithEmailAndPassword(auth, email, document.getElementById("password").value);
     };
 
-    document.getElementById("openMarket").onclick = () => document.getElementById("marketPop").style.display="flex";
-    document.getElementById("openCasino").onclick = () => document.getElementById("casinoPop").style.display="flex";
-    document.getElementById("cSend").onclick = () => talk("cIn", "chat/tik");
-    document.getElementById("vSend").onclick = () => talk("vIn", `vchat/${curRoom}`);
-    document.getElementById("rSend").onclick = () => talk("rIn", "chat/rpl");
-
-    // AUTH İŞLEMLERİ
-    document.getElementById("loginBtn").onclick = () => signInWithEmailAndPassword(auth, document.getElementById("username").value+"@o.com", document.getElementById("password").value).catch(e=>alert("Hata!"));
     document.getElementById("registerBtn").onclick = async () => {
-        const n = document.getElementById("username").value;
-        const r = await createUserWithEmailAndPassword(auth, n+"@o.com", document.getElementById("password").value).catch(e=>alert("Hata!"));
-        if(r) set(ref(db, "users/" + r.user.uid), { username: n, score: 0, power: 1, price: 100, paint: 30 });
+        const name = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+        const res = await createUserWithEmailAndPassword(auth, name + "@oynakral.com", pass);
+        await set(ref(db, "users/" + res.user.uid), { username: name, score: 0, power: 1, price: 100, paint: 30 });
     };
 
-    // LİDERLİK TABLOSU
-    onValue(ref(db, "users"), s => {
-        const b = document.getElementById("board"); b.innerHTML = "";
-        const all = Object.values(s.val() || {}).sort((a,b) => b.score - a.score).slice(0,5);
-        all.forEach((u, i) => b.innerHTML += `<div style="padding:3px; font-size:12px;">#${i+1} ${u.username}: ${Math.floor(u.score)}</div>`);
-    });
-
-    // CHAT DİNLEME
-    onValue(ref(db, "chat/tik"), s => {
-        const el = document.getElementById("cMsgs"); el.innerHTML = "";
-        if(s.exists()) Object.values(s.val()).forEach(m => el.innerHTML += `<div><b class="${m.u==='remobaba'?'admin-name':'user-name'}">${m.u}:</b> ${m.t}</div>`);
-        el.scrollTop = el.scrollHeight;
-    });
-
-    onValue(ref(db, "chat/rpl"), s => {
-        const el = document.getElementById("rMsgs"); el.innerHTML = "";
-        if(s.exists()) Object.values(s.val()).forEach(m => el.innerHTML += `<div><b>${m.u}:</b> ${m.t}</div>`);
-        el.scrollTop = el.scrollHeight;
-    });
-
-    // --- RPLACE AKTİF OYUNCU MOTORU (DÜZELTİLDİ) ---
-    onValue(ref(db, "online_rplace"), s => {
-        const list = document.getElementById("onlineList");
-        const countEl = document.getElementById("rCount");
-        list.innerHTML = "";
-        let count = 0;
-        if(s.exists()) {
-            Object.values(s.val()).forEach(p => {
-                list.innerHTML += `<div class="online-user">● ${p.name}</div>`;
-                count++;
-            });
-        }
-        countEl.innerText = count;
-    });
-
-    // RPLACE PİKSEL MOTORU
-    const canvasDiv = document.getElementById("canvas");
-    for(let i=0; i<40000; i++) {
-        const p = document.createElement("div"); p.className="pixel";
-        p.onclick = () => { if(userData.paint > 0) { runTransaction(ref(db, `users/${user.uid}/paint`), c => (c||0)-1); set(ref(db, `rplace/pixels/${i}`), document.getElementById("color").value); } };
-        canvasDiv.appendChild(p);
-    }
-    onValue(ref(db, "rplace/pixels"), s => { if(s.exists()) Object.keys(s.val()).forEach(k => { if(canvasDiv.children[k]) canvasDiv.children[k].style.background = s.val()[k]; }); });
-    
-    // Boya Dolumu
-    setInterval(() => { if(user) runTransaction(ref(db, `users/${user.uid}/paint`), p => (p < 30 ? p+1 : 30)); }, 5000);
+    setInterval(() => { if (user && userData) runTransaction(ref(db, `users/${user.uid}/paint`), p => ((p || 0) < 30) ? (p || 0) + 1 : 30); }, 5000);
 </script>
 </body>
 </html>
