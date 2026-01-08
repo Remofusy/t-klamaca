@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OynaKral</title>
+    <title>OynaKral - Remobaba VIP (Lite)</title>
     <style>
-        /* PERFORMANS İÇİN SADELEŞTİRİLMİŞ CSS */
+        /* PERFORMANS İÇİN SADELEŞTİRİLMİŞ CSS (Kasmayan Mod) */
         * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
         
         body {
             height: 100vh;
             background: #111; /* Düz siyah/gri arka plan */
             color: #ddd;
-            font-family: sans-serif; /* Standart font */
+            font-family: sans-serif;
             overflow: hidden;
         }
 
@@ -26,13 +26,12 @@
         }
 
         .card {
-            background: #222; /* Yarı saydamlık kaldırıldı */
+            background: #222;
             padding: 20px;
-            border-radius: 4px; /* Yuvarlaklık azaltıldı */
+            border-radius: 4px;
             width: 400px;
             text-align: center;
-            border: 2px solid #555; /* Parlayan kenarlık yerine düz çizgi */
-            /* box-shadow kaldırıldı */
+            border: 2px solid #555;
         }
 
         input, button {
@@ -44,7 +43,6 @@
             font-size: 14px;
             background: #333;
             color: #fff;
-            /* transition kaldırıldı */
         }
 
         button {
@@ -56,13 +54,11 @@
 
         button:hover {
             background: #5c3bb3;
-            /* transform (zıplama) kaldırıldı */
         }
 
         .admin-name { 
             color: #d559ff !important; 
             font-weight: bold; 
-            /* text-shadow kaldırıldı */
         }
 
         .user-name { 
@@ -120,10 +116,10 @@
             margin-bottom: 4px;
             border: 1px solid #333;
         }
-        .dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; /* shadow kaldırıldı */ }
+        .dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; }
 
         #vCanvas {
-            background: #2a2a2a; /* Gradyan kaldırıldı */
+            background: #2a2a2a;
             border-bottom: 5px solid #2ecc71;
         }
 
@@ -543,16 +539,24 @@
 
     document.getElementById("vStart").onclick = () => update(ref(db, `rooms/${curRoom}`), { status: "playing" });
 
+    // DÜZELTİLEN OYUN DÖNGÜSÜ
     setInterval(() => {
         if (!curRoom || !roomData || roomData.status !== "playing" || gameEnded) return;
         let mx = isHost ? roomData.p1x : roomData.p2x;
         let my = isHost ? roomData.p1y : roomData.p2y;
+        
+        // HAREKET KONTROLLERİ
         if (keys['KeyA'] || keys['ArrowLeft']) mx -= 12;
         if (keys['KeyD'] || keys['ArrowRight']) mx += 12;
         if ((keys['KeyW'] || keys['ArrowUp']) && v_onG) { v_vy = -18; v_onG = false; }
+        
+        // YERÇEKİMİ
         if (!v_onG) { v_vy += 0.9; my += v_vy; if (my >= 380) { my = 380; v_vy = 0; v_onG = true; } }
+        
+        // SINIRLAR
         if (isHost) { if (mx < 40) mx = 40; if (mx > 365) mx = 365; }
         else { if (mx < 435) mx = 435; if (mx > 760) mx = 760; }
+        
         if (isHost) {
             let nx = roomData.bx + roomData.bvx, ny = roomData.by + roomData.bvy, nvx = roomData.bvx, nvy = roomData.bvy;
             if (nvx !== 0 || nvy !== 0) nvy += 0.4;
@@ -566,8 +570,9 @@
                 update(ref(db, `rooms/${curRoom}`), { s1: roomData.s1 + (w ? 1 : 0), s2: roomData.s2 + (w ? 0 : 1), bx: w ? 600 : 200, by: 180, bvx: 0, bvy: 0 });
             } else update(ref(db, `rooms/${curRoom}`), { bx: nx, by: ny, bvx: nvx, bvy: nvy, p1x: mx, p1y: my });
         } else {
-            update(ref(db, `rooms/${curRoom}/p2x`), mx);
-            update(ref(db, `rooms/${curRoom}/p2y`), my);
+            // BURASI DÜZELTİLDİ: update() obje ister, tek veri için set() veya toplu update() kullanılır.
+            // Tek seferde odayı güncelleyerek (daha hızlı) sorunu çözdük.
+            update(ref(db, `rooms/${curRoom}`), { p2x: mx, p2y: my });
         }
     }, 35);
 
@@ -602,4 +607,3 @@
 </script>
 </body>
 </html>
-
