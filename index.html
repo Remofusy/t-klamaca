@@ -2,256 +2,620 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>OynaKral - Final Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OynaKral</title>
     <style>
-        *{box-sizing:border-box; outline: none;}
-        body{margin:0;height:100vh;background:#0e0016;color:#fff;font-family:sans-serif;overflow:hidden;}
-        .hidden{display:none!important}
-        .center{display:flex;justify-content:center;align-items:center;height: 100vh;}
-        .card{background:rgba(25, 0, 50, 0.95);padding:30px;border-radius:18px;width:400px;text-align:center;border:1px solid #7a3cff;box-shadow: 0 0 15px #7a3cff55;}
-        input,button{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none;}
-        button{background:#7a3cff;color:#fff;font-weight:bold;cursor:pointer;}
-        button:hover{background:#9b6dff;}
+        /* GENEL TASARIM AYARLARI */
+        * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
         
-        #gameRoot, #voleybolRoot {height:100vh; display:grid; grid-template-columns:220px 1fr 300px;}
-        #rplaceRoot {height:100vh; display:grid; grid-template-columns:220px 1fr 300px; grid-template-rows:1fr 75px;}
-        .sidebar {background:#12001f; padding:15px; border-right:1px solid #333; display:flex; flex-direction:column; gap:10px;}
-        .chat-sidebar {background:#0a0014; padding:15px; border-left:1px solid #333; display:flex; flex-direction:column;}
-        .chat-msgs {flex:1; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:8px; padding:10px; font-size:13px; margin-bottom:10px;}
+        body {
+            height: 100vh;
+            background: #0e0016;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
 
-        #rCenter {background:#1a1a1a; overflow:auto; position:relative;}
-        #canvasWrap {background:#fff; width:2400px; height:2400px;}
-        #canvas {display:grid; grid-template-columns:repeat(200, 12px); width:2400px; height:2400px;}
-        .pixel {width:12px; height:12px; border:0.1px solid #eee; background:#fff;}
-        #rBottom {grid-column:1/4; background:#12001f; border-top:2px solid #7a3cff; display:flex; align-items:center; justify-content:center; gap:30px;}
+        .hidden { display: none !important; }
+
+        .center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* PANEL VE KART TASARIMLARI */
+        .card {
+            background: rgba(25, 0, 50, 0.95);
+            padding: 30px;
+            border-radius: 18px;
+            width: 400px;
+            text-align: center;
+            border: 1px solid #7a3cff;
+            box-shadow: 0 0 25px rgba(122, 60, 255, 0.4);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        button {
+            background: #7a3cff;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #9b6dff;
+            transform: translateY(-2px);
+        }
+
+        /* ÖZEL İSİM RENKLERİ */
+        .admin-name { 
+            color: #bf00ff !important; 
+            font-weight: bold; 
+            text-shadow: 0 0 10px #bf00ff;
+        }
+
+        .user-name { 
+            color: #7a3cff; 
+            font-weight: bold; 
+        }
+
+        /* OYUNLARIN ANA DÜZENİ */
+        #gameRoot, #voleybolRoot, #rplaceRoot {
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+        }
+
+        .sidebar {
+            background: #12001f;
+            padding: 20px;
+            border-right: 2px solid #222;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .chat-sidebar {
+            background: #0a0014;
+            padding: 15px;
+            border-left: 2px solid #222;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-msgs {
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            border: 1px solid #333;
+        }
+
+        /* RPLACE EKRANI VE PİKSEL AYARLARI */
+        #rCenter { background: #1a1a1a; overflow: auto; position: relative; }
+        #canvasWrap { background: #fff; width: 2400px; height: 2400px; }
+        #canvas { display: grid; grid-template-columns: repeat(200, 12px); width: 2400px; height: 2400px; }
         
-        .popup{position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:10000;}
-        .kick-btn {background:#ff3c3c; padding:2px 6px; font-size:11px; border-radius:4px; margin-left:8px; width:auto; cursor:pointer;}
-        #vCanvas {background:linear-gradient(#1a002b, #3e1e5e); border-bottom:8px solid #2ecc71; border-radius:10px;}
+        /* Çizgiler kaldırıldı */
+        .pixel { width: 12px; height: 12px; cursor: crosshair; border: none; outline: none; }
+
+        .online-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 6px;
+            border-radius: 8px;
+        }
+        .dot { width: 10px; height: 10px; background: #2ecc71; border-radius: 50%; box-shadow: 0 0 8px #2ecc71; }
+
+        /* VOLEYBOL SAHASI */
+        #vCanvas {
+            background: linear-gradient(to bottom, #1a002b, #4b2575);
+            border-bottom: 12px solid #2ecc71;
+            border-radius: 20px;
+        }
+
+        /* KİCK BUTONU (VOLEYBOL) */
+        .v-kick-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            float: right;
+            width: auto;
+            margin-top: 0;
+        }
+
+        /* BİLDİRİM SİSTEMİ */
+        #toast {
+            position: fixed;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7a3cff;
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            z-index: 999999;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            font-weight: bold;
+        }
+
+        .popup {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 50000;
+        }
     </style>
 </head>
 <body>
 
-<div class="center" id="authDiv"><div class="card"><h1>👑 OynaKral</h1><input id="username" placeholder="Kullanıcı Adı"><input id="password" type="password" placeholder="Şifre"><button id="loginBtn">Giriş Yap</button><button id="registerBtn" style="background:#444">Kayıt Ol</button></div></div>
+<div id="toast">Bildirim Mesajı</div>
+
+<div class="center" id="authDiv">
+    <div class="card">
+        <h1 style="color: #bf00ff; margin-bottom: 10px;">👑 OynaKral</h1>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 10px;">Remobaba VIP v2.0</p>
+        <input id="username" placeholder="Kullanıcı Adı">
+        <input id="password" type="password" placeholder="Şifre">
+        <button id="loginBtn">Giriş Yap</button>
+        <button id="registerBtn" style="background:#333">Yeni Hesap Oluştur</button>
+    </div>
+</div>
 
 <div class="center hidden" id="gameSelect">
     <div class="card">
-        <h2>🎮 Oyun Seç</h2>
-        <button id="btnC">🖱️ Tıklamaca</button>
-        <button id="btnR">🎨 r/place</button>
-        <button id="btnV">🏐 Voleybol</button>
-        <button id="logoutBtn" style="background:#cc2b2b; margin-top:20px;">Çıkış Yap</button>
+        <h2 style="margin-bottom: 15px;">🎮 Hoş Geldin!</h2>
+        <button id="btnC" style="background: #2980b9;">🖱️ Tıklamaca</button>
+        <button id="btnR" style="background: #27ae60;">🎨 Rplace</button>
+        <button id="btnV" style="background: #f39c12;">🏐 Voleybol</button>
+        <button id="logoutBtn" style="background:#c0392b; margin-top:30px;">Güvenli Çıkış</button>
     </div>
 </div>
 
 <div id="gameRoot" class="hidden">
     <div class="sidebar">
         <button onclick="document.getElementById('marketPop').style.display='flex'">🛒 Market</button>
-        <button onclick="document.getElementById('casinoPop').style.display='flex'">🎰 Casino</button>
-        <button class="backMenu">⬅ Menü</button>
+        <button onclick="document.getElementById('casinoPop').style.display='flex'">🎰 Casino (Yazı-Tura)</button>
+        <button class="backMenu" style="background: #444;">⬅ Ana Menü</button>
     </div>
-    <div class="center"><div class="card"><h2 id="scoreDisp">Altın: 0</h2><h3 id="powerDisp">Güç: 1</h3><button id="clickBtn" style="height:120px; font-size:40px;">🖱️</button></div></div>
-    <div class="chat-sidebar"><h3>🏆 Sıralama</h3><ul id="board" style="padding:0; list-style:none; color:#3cff7a; font-size:14px; margin-bottom:10px;"></ul><div class="chat-msgs" id="cMsgs"></div><input id="cIn" placeholder="Mesaj..."><button id="cSend">Gönder</button></div>
+    <div class="center">
+        <div class="card" style="width: 500px;">
+            <h1 id="scoreDisp" style="font-size: 40px; color: #f1c40f;">Altın: 0</h1>
+            <h3 id="powerDisp" style="color: #3498db; margin-bottom: 20px;">Tıklama Gücü: 1</h3>
+            <button id="clickBtn" style="height:200px; width:200px; font-size:80px; border-radius: 50%; border: 5px solid #7a3cff;">🖱️</button>
+        </div>
+    </div>
+    <div class="chat-sidebar">
+        <h3 style="text-align: center; color: #f1c40f;">🏆 Zenginler Listesi</h3>
+        <ul id="board" style="padding:15px 0; list-style:none;"></ul>
+        <div class="chat-msgs" id="cMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="cIn" placeholder="Mesaj yaz..." style="margin:0;">
+            <button id="cSend" style="width:70px; margin:0;">🚀</button>
+        </div>
+    </div>
 </div>
 
 <div id="rplaceRoot" class="hidden">
-    <div class="sidebar"><button class="backMenu">⬅ Menü</button><div style="color:#7a3cff; font-weight:bold;">🟢 Aktif: <span id="rCount">0</span></div><div id="onlineList"></div></div>
+    <div class="sidebar">
+        <button class="backMenu" style="background: #444;">⬅ Menü</button>
+        <div style="color:#7a3cff; font-weight:bold; font-size: 20px; margin-top: 10px;">🟢 Aktif: <span id="rCount">0</span></div>
+        <div id="onlineList" style="margin-top: 20px;"></div>
+    </div>
     <div id="rCenter"><div id="canvasWrap"><div id="canvas"></div></div></div>
-    <div class="chat-sidebar"><h3>💬 Chat</h3><div class="chat-msgs" id="rMsgs"></div><input id="rIn" placeholder="Mesaj..."><button id="rSend">Gönder</button></div>
-    <div id="rBottom"><input type="color" id="color" value="#ff0000" style="width:30px; height:30px;"><div style="font-size:18px;">🎨 Boya: <span id="paintText">30</span>/30</div></div>
+    <div class="chat-sidebar">
+        <h3 style="text-align: center; color: #27ae60;">💬 Küresel Sohbet</h3>
+        <div class="chat-msgs" id="rMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="rIn" placeholder="Buraya yaz..." style="margin:0;">
+            <button id="rSend" style="width:70px; margin:0;">🚀</button>
+        </div>
+    </div>
+    <div id="rBottom" style="grid-column: 1/4; display: flex; align-items: center; justify-content: center; background: #12001f; border-top: 3px solid #7a3cff; gap: 30px; height: 80px;">
+        <input type="color" id="color" value="#ff0000" style="width:50px; height:50px; border:none; background:none;">
+        <div style="font-size:20px; font-weight: bold;">🎨 Kalan Boya: <span id="paintText" style="color:#7a3cff;">30</span> / 30</div>
+    </div>
 </div>
 
 <div id="voleybolRoot" class="hidden">
-    <div class="sidebar"><button class="backMenu">⬅ Menü</button><div id="vLobby"><button id="vCreate">Oda Kur</button><input id="vJoinCode" placeholder="Kod"><button id="vJoin">Katıl</button></div><div id="vInfo" class="hidden"><h3 id="vDispCode">-</h3><div id="vPlayerList"></div><button id="vStart" class="hidden" style="background:#28a745">BAŞLAT</button><h2 id="vScore">0 - 0</h2></div></div>
+    <div class="sidebar">
+        <button class="backMenu" style="background: #444;">⬅ Menü</button>
+        <div id="vLobby">
+            <button id="vCreate" style="background: #27ae60;">Oda Oluştur</button>
+            <input id="vJoinCode" placeholder="Oda Kodu Gir">
+            <button id="vJoin" style="background: #2980b9;">Odaya Katıl</button>
+        </div>
+        <div id="vInfo" class="hidden">
+            <h3 id="vDispCode" style="color:#f39c12;">ODA: -</h3>
+            <div id="vPlayerList" style="padding:15px; background:rgba(255,255,255,0.05); border-radius:12px; margin: 10px 0;"></div>
+            <button id="vStart" class="hidden" style="background:#2ecc71">OYUNU BAŞLAT</button>
+            <h2 id="vScore" style="margin-top:30px; color:#f1c40f; font-size:50px; text-align: center;">0 - 0</h2>
+        </div>
+    </div>
     <div class="center"><canvas id="vCanvas" width="800" height="400" class="hidden"></canvas></div>
-    <div class="chat-sidebar hidden" id="vChatSide"><h3>💬 Oda Chat</h3><div class="chat-msgs" id="vMsgs"></div><input id="vIn" placeholder="Mesaj..."><button id="vSend">Gönder</button></div>
+    <div class="chat-sidebar hidden" id="vChatSide">
+        <h3 style="text-align: center;">💬 Oda Sohbeti</h3>
+        <div class="chat-msgs" id="vMsgs"></div>
+        <div style="display:flex; gap:5px;">
+            <input id="vIn" placeholder="Mesaj..." style="margin:0;">
+            <button id="vSend" style="width:70px; margin:0;">🚀</button>
+        </div>
+    </div>
 </div>
 
-<div id="marketPop" class="popup"><div class="card"><h3>🛒 Market</h3><p id="marketInfo"></p><button id="buyPowerBtn">GELİŞTİR</button><button onclick="document.getElementById('marketPop').style.display='none'">Kapat</button></div></div>
-<div id="casinoPop" class="popup"><div class="card"><h3>🎰 Yazı Tura</h3><input id="bet" type="number" placeholder="Bahis"><button id="btnYazi">YAZI</button><button id="btnTura">TURA</button><p id="coinInfo"></p><button onclick="document.getElementById('casinoPop').style.display='none'">Kapat</button></div></div>
+<div id="marketPop" class="popup">
+    <div class="card">
+        <h2 style="color: #2ecc71;">🛒 Market</h2>
+        <p id="marketInfo" style="margin: 20px 0; font-size: 16px;"></p>
+        <button id="buyPowerBtn" style="background: #27ae60;">GELİŞTİR (+1 GÜÇ)</button>
+        <button onclick="document.getElementById('marketPop').style.display='none'" style="background:#444">Kapat</button>
+    </div>
+</div>
+
+<div id="casinoPop" class="popup">
+    <div class="card">
+        <h2 style="color: #f1c40f;">🎰 Yazı-Tura Casino</h2>
+        <input id="betAmount" type="number" placeholder="Bahis miktarını girin">
+        <div style="display:flex; gap:15px; margin-top: 10px;">
+            <button id="betYazi" style="background: #2ecc71; height: 60px;">YAZI</button>
+            <button id="betTura" style="background: #e67e22; height: 60px;">TURA</button>
+        </div>
+        <p id="casinoResult" style="margin-top:20px; font-weight:bold; font-size: 18px; min-height: 25px;"></p>
+        <button onclick="document.getElementById('casinoPop').style.display='none'" style="background:#444">Masadan Kalk</button>
+    </div>
+</div>
+
+<div id="resultPop" class="popup">
+    <div class="card">
+        <h1 id="resultTitle">OYUN BİTTİ</h1>
+        <p id="resultDesc" style="margin: 20px 0; font-size: 20px;"></p>
+        <button onclick="location.reload()" style="background: #7a3cff;">TAMAM</button>
+    </div>
+</div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth,signInWithEmailAndPassword,createUserWithEmailAndPassword,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getDatabase,ref,set,push,onValue,runTransaction,get,remove,update,onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    /* FIREBASE KURULUMU VE MODÜL İŞLEMLERİ */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, set, push, onValue, runTransaction, get, remove, update, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const config={apiKey:"AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",authDomain:"click-game-2de2f.firebaseapp.com",databaseURL:"https://click-game-2de2f-default-rtdb.firebaseio.com"};
-const app=initializeApp(config); const auth=getAuth(app); const db=getDatabase(app);
-
-let user=null, userData=null, curRoom=null, isHost=false, roomData=null;
-
-/* --- AUTH & GLOBAL --- */
-onAuthStateChanged(auth, u => {
-    if(!u) { authDiv.classList.remove("hidden"); return; }
-    user=u; authDiv.classList.add("hidden"); gameSelect.classList.remove("hidden");
-    onValue(ref(db,"users/"+u.uid), s => {
-        userData=s.val(); if(!userData) return;
-        if(userData.kicked) { update(ref(db,"users/"+user.uid),{kicked:false}); location.reload(); }
-        scoreDisp.innerText="Altın: "+(userData.score || 0);
-        powerDisp.innerText="Güç: "+(userData.power || 1);
-        paintText.innerText=userData.paint||0;
-        marketInfo.innerText=`Güç +1 | Fiyat: ${userData.price || 100}`;
-    });
-});
-loginBtn.onclick=()=>signInWithEmailAndPassword(auth,username.value+"@oynakral.com",password.value).catch(e=>alert("Hata: "+e.message));
-registerBtn.onclick=async()=>{
-    const n=username.value, p=password.value;
-    const c=await createUserWithEmailAndPassword(auth,n+"@oynakral.com",p);
-    await set(ref(db,"users/"+c.user.uid),{username:n,score:0,power:1,price:100,paint:30,kicked:false});
-};
-logoutBtn.onclick=()=>signOut(auth);
-document.querySelectorAll(".backMenu").forEach(b=>b.onclick=()=>location.reload());
-
-/* --- TIKLAMACA --- */
-clickBtn.onclick=()=>runTransaction(ref(db,"users/"+user.uid),d=>{if(d){d.score=(d.score||0)+(d.power||1);}return d});
-buyPowerBtn.onclick=()=>{
-    runTransaction(ref(db,"users/"+user.uid),d=>{
-        if(!d) return d;
-        let p = d.price || 100;
-        if((d.score || 0) >= p){ d.score -= p; d.power = (d.power || 1) + 1; d.price = Math.floor(p * 1.3); }
-        else { alert("Yetersiz Altın!"); }
-        return d;
-    });
-};
-const playCoin=(choice)=>{
-    const b = parseInt(bet.value); if(!b || b<=0) return;
-    runTransaction(ref(db,"users/"+user.uid),d=>{
-        if(!d || (d.score||0)<b) return d;
-        d.score -= b; const res = Math.random() < 0.5 ? "yazi" : "tura";
-        if(res === choice){ d.score += b * 2; coinInfo.innerText="KAZANDIN! Sonuç: "+res.toUpperCase(); }
-        else { coinInfo.innerText="KAYBETTİN! Sonuç: "+res.toUpperCase(); }
-        return d;
-    });
-};
-btnYazi.onclick=()=>playCoin("yazi"); btnTura.onclick=()=>playCoin("tura");
-
-onValue(ref(db,"users"), s => {
-    const d=s.val(); if(!d) return;
-    const arr = Object.values(d).sort((a,b)=>b.score-a.score).slice(0,5);
-    board.innerHTML = arr.map(u=>`<li>${u.username}: ${u.score}</li>`).join("");
-});
-
-/* --- R/PLACE (BOYAMA VE LİSTE FİX) --- */
-const cvs=document.getElementById("canvas");
-for(let i=0; i<40000; i++){
-    const p=document.createElement("div"); p.className="pixel";
-    p.onclick=()=>{ 
-        if(userData.paint > 0){
-            runTransaction(ref(db,"users/"+user.uid+"/paint"), pt => (pt || 0) - 1);
-            set(ref(db,"rplace/pixels/"+i), color.value);
-        } else { alert("Boyan bitti! Bekle doluyor..."); }
+    const firebaseConfig = {
+        apiKey: "AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
+        authDomain: "click-game-2de2f.firebaseapp.com",
+        databaseURL: "https://click-game-2de2f-default-rtdb.firebaseio.com"
     };
-    cvs.appendChild(p);
-}
-onValue(ref(db,"rplace/pixels"), s => {
-    const d=s.val(); if(!d) return;
-    Object.keys(d).forEach(k => { if(cvs.children[k]) cvs.children[k].style.background = d[k]; });
-});
 
-function trackRplace(){
-    const oRef=ref(db,"rplace/online/"+user.uid);
-    set(oRef,{name:userData.username, id:user.uid}); onDisconnect(oRef).remove();
-    onValue(ref(db,"rplace/online"), s => {
-        const d=s.val()||{}; const ks=Object.keys(d);
-        let count = 0; onlineList.innerHTML="";
-        ks.forEach(k=>{
-            const p=d[k];
-            if(p.name && p.name !== "undefined"){
-                count++;
-                let kBtn=(userData.username==="remobaba" && p.id!==user.uid)?`<button class="kick-btn" onclick="window.kickPlayer('${p.id}')">AT</button>`:"";
-                onlineList.innerHTML += `<div style="margin-bottom:5px">👤 ${p.name} ${kBtn}</div>`;
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    let user = null;
+    let userData = null;
+    let curRoom = null;
+    let isHost = false;
+    let roomData = null;
+    let gameEnded = false;
+
+    /* BİLDİRİM VE YAZI-TURA FONKSİYONLARI */
+    function showNotify(msg) {
+        const t = document.getElementById("toast");
+        t.innerText = msg;
+        t.style.display = "block";
+        setTimeout(() => { t.style.display = "none"; }, 3000);
+    }
+
+    /* KULLANICI GİRİŞ DURUMUNU TAKİP ET */
+    onAuthStateChanged(auth, u => {
+        if (!u) {
+            document.getElementById("authDiv").classList.remove("hidden");
+            document.getElementById("gameSelect").classList.add("hidden");
+            return;
+        }
+        user = u;
+        document.getElementById("authDiv").classList.add("hidden");
+        document.getElementById("gameSelect").classList.remove("hidden");
+
+        onValue(ref(db, "users/" + u.uid), s => {
+            userData = s.val();
+            if (!userData) return;
+            if (userData.kicked) {
+                update(ref(db, "users/" + user.uid), { kicked: false });
+                signOut(auth);
+                location.reload();
+            }
+            document.getElementById("scoreDisp").innerText = "Altın: " + (userData.score || 0);
+            document.getElementById("powerDisp").innerText = "Tıklama Gücü: " + (userData.power || 1);
+            document.getElementById("paintText").innerText = userData.paint || 0;
+            document.getElementById("marketInfo").innerText = `Güç: ${userData.power} | Fiyat: ${userData.price || 100} Altın`;
+        });
+    });
+
+    /* CASINO SİSTEMİ */
+    function handleCasino(choice) {
+        const bet = parseInt(document.getElementById("betAmount").value);
+        if (!bet || bet <= 0) { showNotify("Lütfen geçerli bir bahis gir!"); return; }
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (!d) return d;
+            if (d.score < bet) return undefined;
+            d.score -= bet;
+            return d;
+        }).then(result => {
+            if (!result.committed) { showNotify("Yetersiz Altın!"); return; }
+            const winResult = Math.random() < 0.5 ? "yazi" : "tura";
+            const isWin = winResult === choice;
+            const resEl = document.getElementById("casinoResult");
+            if (isWin) {
+                runTransaction(ref(db, "users/" + user.uid), d => { if (d) d.score += (bet * 2); return d; });
+                resEl.style.color = "#2ecc71";
+                resEl.innerText = "KAZANDIN! Sonuç: " + winResult.toUpperCase();
+            } else {
+                resEl.style.color = "#e74c3c";
+                resEl.innerText = "KAYBETTİN! Sonuç: " + winResult.toUpperCase();
             }
         });
-        rCount.innerText = count;
+    }
+    document.getElementById("betYazi").onclick = () => handleCasino("yazi");
+    document.getElementById("betTura").onclick = () => handleCasino("tura");
+
+    /* CHAT VE ADMIN YÖNETİMİ */
+    function setupChat(elId, path) {
+        onValue(ref(db, path), s => {
+            const el = document.getElementById(elId);
+            el.innerHTML = "";
+            const data = s.val();
+            if (!data) return;
+            Object.values(data).forEach(m => {
+                const nameClass = m.u === "remobaba" ? "admin-name" : "user-name";
+                el.innerHTML += `<div><b class="${nameClass}">${m.u}:</b> ${m.t}</div>`;
+            });
+            el.scrollTop = el.scrollHeight;
+        });
+    }
+
+    async function sendChatMessage(inpId, path) {
+        const inp = document.getElementById(inpId);
+        if (!inp.value) return;
+        if (userData.muted) { showNotify("Susturuldun!"); return; }
+        push(ref(db, path), { u: userData.username, t: inp.value });
+        inp.value = "";
+    }
+
+    document.getElementById("cSend").onclick = () => sendChatMessage("cIn", "chat/tik");
+    document.getElementById("rSend").onclick = () => sendChatMessage("rIn", "chat/rpl");
+    setupChat("cMsgs", "chat/tik");
+    setupChat("rMsgs", "chat/rpl");
+
+    /* TIKLAMACA OYUNU MANTIĞI */
+    document.getElementById("clickBtn").onclick = () => {
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (d) d.score = (d.score || 0) + (d.power || 1);
+            return d;
+        });
+    };
+
+    onValue(ref(db, "users"), s => {
+        const d = s.val(); if (!d) return;
+        const sorted = Object.values(d).sort((a, b) => b.score - a.score).slice(0, 5);
+        document.getElementById("board").innerHTML = sorted.map(u => {
+            const nCls = u.username === "remobaba" ? "admin-name" : "user-name";
+            return `<li style="margin-bottom:8px; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px; border-left: 3px solid #7a3cff;">
+                <b class="${nCls}">${u.username}</b>: ${u.score}
+            </li>`;
+        }).join("");
     });
-}
-window.kickPlayer=(tid)=>update(ref(db,"users/"+tid),{kicked:true});
 
-/* --- CHAT SİSTEMİ (TIKRİR FIX) --- */
-function syncChat(el, path){
-    onValue(ref(db,path), s => {
-        el.innerHTML=""; const d=s.val(); if(!d) return;
-        Object.values(d).forEach(m => el.innerHTML += `<div><b>${m.u}:</b> ${m.t}</div>`);
-        el.scrollTop = el.scrollHeight;
+    document.getElementById("buyPowerBtn").onclick = () => {
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (!d) return d;
+            let p = d.price || 100;
+            if (d.score >= p) { d.score -= p; d.power++; d.price = Math.floor(p * 1.5); }
+            return d;
+        });
+    };
+
+    /* RPLACE OYUNU MANTIĞI */
+    const cvs = document.getElementById("canvas");
+    for (let i = 0; i < 40000; i++) {
+        const p = document.createElement("div");
+        p.className = "pixel";
+        p.onclick = () => {
+            if (userData.paint > 0) {
+                runTransaction(ref(db, `users/${user.uid}/paint`), c => (c || 0) - 1);
+                set(ref(db, `rplace/pixels/${i}`), document.getElementById("color").value);
+            } else { showNotify("Boya bekleniyor..."); }
+        };
+        cvs.appendChild(p);
+    }
+    onValue(ref(db, "rplace/pixels"), s => {
+        const data = s.val(); if (!data) return;
+        Object.keys(data).forEach(k => { if (cvs.children[k]) cvs.children[k].style.background = data[k]; });
     });
-}
-function chatSend(inp, path){
-    const msg = inp.value; if(!msg) return;
-    if(msg==="/temizle" && userData.username==="remobaba"){ remove(ref(db,path)); inp.value=""; return; }
-    push(ref(db,path), {u:userData.username, t:msg}); inp.value="";
-}
-cSend.onclick=()=>chatSend(cIn, "chat/tik");
-rSend.onclick=()=>chatSend(rIn, "chat/rpl");
-vSend.onclick=()=>chatSend(vIn, `vchat/${curRoom}`);
-syncChat(cMsgs, "chat/tik"); syncChat(rMsgs, "chat/rpl");
 
-/* --- VOLEYBOL (TEMASSIZ HAREKET FIX) --- */
-const vCtx=vCanvas.getContext("2d");
-let vKeys={}; window.onkeydown=e=>vKeys[e.code]=true; window.onkeyup=e=>vKeys[e.code]=false;
-let vVy=0, vOnGround=true;
+    function startPresenceTracking() {
+        const myPresenceRef = ref(db, `rplace/online/${user.uid}`);
+        onDisconnect(myPresenceRef).remove();
+        set(myPresenceRef, { username: userData.username });
+        onValue(ref(db, "rplace/online"), s => {
+            const listEl = document.getElementById("onlineList");
+            const countEl = document.getElementById("rCount");
+            const allPlayers = s.val();
+            listEl.innerHTML = "";
+            if (!allPlayers) { countEl.innerText = "0"; return; }
+            const validPlayers = Object.values(allPlayers).filter(p => p.username && p.username !== "undefined");
+            countEl.innerText = validPlayers.length;
+            validPlayers.forEach(p => {
+                const nCls = p.username === "remobaba" ? "admin-name" : "user-name";
+                listEl.innerHTML += `<div class="online-user"><div class="dot"></div><span class="${nCls}">${p.username}</span></div>`;
+            });
+        });
+    }
 
-vCreate.onclick=()=>{
-    const rid=Math.floor(1000+Math.random()*9000); curRoom=rid; isHost=true;
-    set(ref(db,`rooms/${rid}`),{host:userData.username, status:"waiting", p1x:150, p1y:380, p2x:650, p2y:380, bx:400, by:180, bvx:0, bvy:0, s1:0, s2:0});
-    vInit(rid);
-};
-vJoin.onclick=()=>{
-    const rid=vJoinCode.value; get(ref(db,`rooms/${rid}`)).then(s=>{
-        if(s.exists() && !s.val().guest){ curRoom=rid; isHost=false; update(ref(db,`rooms/${rid}`),{guest:userData.username}); vInit(rid); }
-    });
-};
-function vInit(rid){
-    vLobby.classList.add("hidden"); vInfo.classList.remove("hidden"); vCanvas.classList.remove("hidden"); vChatSide.classList.remove("hidden");
-    vDispCode.innerText="ODA: "+rid; syncChat(vMsgs, `vchat/${rid}`);
-    onValue(ref(db,`rooms/${rid}`), s => {
-        roomData=s.val(); if(!roomData) return;
-        if(roomData.status==="playing"){ vStart.classList.add("hidden"); vRender(roomData); }
-        else{ vPlayerList.innerHTML=`${roomData.host} vs ${roomData.guest||'?'}`; if(isHost&&roomData.guest)vStart.classList.remove("hidden"); }
-        vScore.innerText=`${roomData.s1} - ${roomData.s2}`;
-    });
-}
-vStart.onclick=()=>update(ref(db,`rooms/${curRoom}`),{status:"playing"});
+    /* VOLEYBOL OYUNU VE OYUNCU ATMA MANTIĞI */
+    const vC = document.getElementById("vCanvas");
+    const ctx = vC.getContext("2d");
+    let keys = {};
+    window.onkeydown = e => keys[e.code] = true;
+    window.onkeyup = e => keys[e.code] = false;
+    let v_vy = 0, v_onG = true;
 
-setInterval(()=>{
-    if(!curRoom || !roomData || roomData.status!=="playing") return;
-    let mx=isHost?roomData.p1x:roomData.p2x, my=isHost?roomData.p1y:roomData.p2y;
-    if(vKeys['KeyA']) mx-=12; if(vKeys['KeyD']) mx+=12;
-    if(vKeys['KeyW'] && vOnGround){ vVy=-16; vOnGround=false; }
-    if(!vOnGround){ vVy+=0.8; my+=vVy; if(my>=380){my=380; vVy=0; vOnGround=true;} }
-    if(isHost){ if(mx<40)mx=40; if(mx>365)mx=365; } else { if(mx<435)mx=435; if(mx>760)mx=760; }
-
-    if(isHost){
-        let nbx=roomData.bx+roomData.bvx, nby=roomData.by+roomData.bvy, nbvx=roomData.bvx, nbvy=roomData.bvy;
-        if(nbvx!==0 || nbvy!==0) nbvy+=0.35; // Sadece hareket edince yerçekimi başlar
-        
-        const d1=Math.hypot(nbx-roomData.p1x, nby-(roomData.p1y-20));
-        const d2=Math.hypot(nbx-roomData.p2x, nby-(roomData.p2y-20));
-        if(d1<45){ nbvy=-11; nbvx=(nbx-roomData.p1x)*0.5; }
-        if(d2<45){ nbvy=-11; nbvx=(nbx-roomData.p2x)*0.5; }
-        
-        if(nbx>385 && nbx<415 && nby>250){ nbvx*=-1; nbx=(nbx<400)?384:416; } // Direk
-        if(nbx<15 || nbx>785) nbvx*=-1; if(nby<15) nbvy*=-1;
-        
-        if(nby>395){
-            const s1w=nbx>400; update(ref(db,`rooms/${curRoom}`),{s1:roomData.s1+(s1w?1:0), s2:roomData.s2+(s1w?0:1), bx:s1w?600:200, by:180, bvx:0, bvy:0});
-        } else {
-            update(ref(db,`rooms/${curRoom}`),{bx:nbx, by:nby, bvx:nbvx, bvy:nbvy, p1x:mx, p1y:my});
+    // Oyuncuyu Odadan Atma Fonksiyonu
+    window.kickPlayer = () => {
+        if (isHost && curRoom) {
+            update(ref(db, `rooms/${curRoom}`), { guest: null, guestId: null, status: "waiting" });
+            showNotify("Oyuncu odadan atıldı!");
         }
-    } else { update(ref(db,`rooms/${curRoom}/p2x`), mx); update(ref(db,`rooms/${curRoom}/p2y`), my); }
-}, 30);
+    };
 
-function vRender(d){
-    vCtx.clearRect(0,0,800,400); vCtx.fillStyle="#fff"; vCtx.fillRect(397,250,6,150);
-    vCtx.fillStyle="#ff3c7a"; vCtx.beginPath(); vCtx.arc(d.p1x,d.p1y,35,Math.PI,0); vCtx.fill();
-    vCtx.fillStyle="#3cff7a"; vCtx.beginPath(); vCtx.arc(d.p2x,d.p2y,35,Math.PI,0); vCtx.fill();
-    vCtx.fillStyle="#f1c40f"; vCtx.beginPath(); vCtx.arc(d.bx,d.by,13,0,Math.PI*2); vCtx.fill();
-}
+    function vEnd(t, d) {
+        if (gameEnded) return;
+        gameEnded = true;
+        document.getElementById("resultTitle").innerText = t;
+        document.getElementById("resultDesc").innerText = d;
+        document.getElementById("resultPop").style.display = "flex";
+        if (curRoom) remove(ref(db, `rooms/${curRoom}`));
+    }
 
-/* --- NAV --- */
-btnC.onclick=()=>{gameSelect.classList.add("hidden"); gameRoot.classList.remove("hidden");};
-btnR.onclick=()=>{gameSelect.classList.add("hidden"); rplaceRoot.classList.remove("hidden"); trackRplace();};
-btnV.onclick=()=>{gameSelect.classList.add("hidden"); voleybolRoot.classList.remove("hidden");};
-setInterval(()=> {if(user && (userData?.paint||0)<30) runTransaction(ref(db,"users/"+user.uid+"/paint"),p=>(p||0)+1);}, 5000);
+    document.getElementById("vCreate").onclick = () => {
+        const id = Math.floor(1000 + Math.random() * 9000);
+        curRoom = id; isHost = true;
+        const rRef = ref(db, `rooms/${id}`);
+        set(rRef, { host: userData.username, hostId: user.uid, status: "waiting", p1x: 150, p1y: 380, p2x: 650, p2y: 380, bx: 400, by: 180, bvx: 0, bvy: 0, s1: 0, s2: 0 });
+        onDisconnect(rRef).remove();
+        initVolleyballRoom(id);
+    };
+
+    document.getElementById("vJoin").onclick = () => {
+        const id = document.getElementById("vJoinCode").value;
+        get(ref(db, `rooms/${id}`)).then(s => {
+            if (s.exists() && !s.val().guest) {
+                curRoom = id; isHost = false;
+                update(ref(db, `rooms/${id}`), { guest: userData.username, guestId: user.uid });
+                initVolleyballRoom(id);
+            } else { showNotify("Oda bulunamadı veya dolu!"); }
+        });
+    };
+
+    function initVolleyballRoom(id) {
+        document.getElementById("vLobby").classList.add("hidden");
+        document.getElementById("vInfo").classList.remove("hidden");
+        vC.classList.remove("hidden");
+        document.getElementById("vChatSide").classList.remove("hidden");
+        document.getElementById("vDispCode").innerText = "ODA: " + id;
+        setupChat("vMsgs", `vchat/${id}`);
+        
+        onValue(ref(db, `rooms/${id}`), s => {
+            roomData = s.val();
+            if (!roomData) return;
+
+            // Eğer oyuncu atılmışsa ve o oyuncu bizsek
+            if (!isHost && roomData.guestId !== user.uid && roomData.status === "waiting") {
+                location.reload(); 
+            }
+
+            if (roomData.status === "playing") {
+                document.getElementById("vStart").classList.add("hidden");
+                drawVolleyball(roomData);
+            } else {
+                let guestHtml = roomData.guest ? `<b>P2:</b> ${roomData.guest}` : '<b>P2:</b> Bekleniyor...';
+                // Kurucuysan ve rakip varsa atma butonu ekle
+                if (isHost && roomData.guest) {
+                    guestHtml += ` <button class="v-kick-btn" onclick="kickPlayer()">[X] AT</button>`;
+                }
+                document.getElementById("vPlayerList").innerHTML = `<b>P1:</b> ${roomData.host} <br> ${guestHtml}`;
+                if (isHost && roomData.guest) document.getElementById("vStart").classList.remove("hidden");
+                else document.getElementById("vStart").classList.add("hidden");
+            }
+            document.getElementById("vScore").innerText = `${roomData.s1} - ${roomData.s2}`;
+        });
+    }
+
+    document.getElementById("vStart").onclick = () => update(ref(db, `rooms/${curRoom}`), { status: "playing" });
+
+    /* OYUN DÖNGÜSÜ VE FİZİKLER */
+    setInterval(() => {
+        if (!curRoom || !roomData || roomData.status !== "playing" || gameEnded) return;
+        let mx = isHost ? roomData.p1x : roomData.p2x;
+        let my = isHost ? roomData.p1y : roomData.p2y;
+        if (keys['KeyA'] || keys['ArrowLeft']) mx -= 12;
+        if (keys['KeyD'] || keys['ArrowRight']) mx += 12;
+        if ((keys['KeyW'] || keys['ArrowUp']) && v_onG) { v_vy = -18; v_onG = false; }
+        if (!v_onG) { v_vy += 0.9; my += v_vy; if (my >= 380) { my = 380; v_vy = 0; v_onG = true; } }
+        if (isHost) { if (mx < 40) mx = 40; if (mx > 365) mx = 365; }
+        else { if (mx < 435) mx = 435; if (mx > 760) mx = 760; }
+        if (isHost) {
+            let nx = roomData.bx + roomData.bvx, ny = roomData.by + roomData.bvy, nvx = roomData.bvx, nvy = roomData.bvy;
+            if (nvx !== 0 || nvy !== 0) nvy += 0.4;
+            if (Math.hypot(nx - roomData.p1x, ny - (roomData.p1y - 20)) < 45) { nvy = -12; nvx = (nx - roomData.p1x) * 0.5; }
+            if (Math.hypot(nx - roomData.p2x, ny - (roomData.p2y - 20)) < 45) { nvy = -12; nvx = (nx - roomData.p2x) * 0.4; }
+            if (nx > 385 && nx < 415 && ny > 250) { nvx *= -1.2; nx = (nx < 400) ? 384 : 416; }
+            if (nx < 15 || nx > 785) nvx *= -1;
+            if (ny < 15) nvy *= -1;
+            if (ny > 395) {
+                const w = nx > 400;
+                update(ref(db, `rooms/${curRoom}`), { s1: roomData.s1 + (w ? 1 : 0), s2: roomData.s2 + (w ? 0 : 1), bx: w ? 600 : 200, by: 180, bvx: 0, bvy: 0 });
+            } else update(ref(db, `rooms/${curRoom}`), { bx: nx, by: ny, bvx: nvx, bvy: nvy, p1x: mx, p1y: my });
+        } else {
+            update(ref(db, `rooms/${curRoom}/p2x`), mx);
+            update(ref(db, `rooms/${curRoom}/p2y`), my);
+        }
+    }, 35);
+
+    function drawVolleyball(d) {
+        ctx.clearRect(0,0,800,400);
+        ctx.fillStyle="#fff"; ctx.fillRect(397, 250, 6, 150);
+        ctx.fillStyle="#ff3c7a"; ctx.beginPath(); ctx.arc(d.p1x, d.p1y, 35, Math.PI, 0); ctx.fill();
+        ctx.fillStyle="#3cff7a"; ctx.beginPath(); ctx.arc(d.p2x, d.p2y, 35, Math.PI, 0); ctx.fill();
+        ctx.fillStyle="#f1c40f"; ctx.beginPath(); ctx.arc(d.bx, d.by, 15, 0, Math.PI * 2); ctx.fill();
+    }
+
+    /* MENÜ YÖNLENDİRMELERİ */
+    document.getElementById("btnC").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("gameRoot").classList.remove("hidden"); };
+    document.getElementById("btnR").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("rplaceRoot").classList.remove("hidden"); startPresenceTracking(); };
+    document.getElementById("btnV").onclick = () => { document.getElementById("gameSelect").classList.add("hidden"); document.getElementById("voleybolRoot").classList.remove("hidden"); };
+    document.querySelectorAll(".backMenu").forEach(b => b.onclick = () => location.reload());
+    document.getElementById("vSend").onclick = () => sendChatMessage("vIn", `vchat/${curRoom}`);
+    document.getElementById("logoutBtn").onclick = () => signOut(auth);
+
+    /* KAYIT VE GİRİŞ */
+    document.getElementById("loginBtn").onclick = () => {
+        const email = document.getElementById("username").value + "@oynakral.com";
+        signInWithEmailAndPassword(auth, email, document.getElementById("password").value).catch(e => showNotify("Hata!"));
+    };
+
+    document.getElementById("registerBtn").onclick = async () => {
+        const name = document.getElementById("username").value;
+        const pass = document.getElementById("password").value;
+        const res = await createUserWithEmailAndPassword(auth, name + "@oynakral.com", pass).catch(e => showNotify("Hata!"));
+        if(res) await set(ref(db, "users/" + res.user.uid), { username: name, score: 0, power: 1, price: 100, paint: 30 });
+    };
+
+    /* BOYA YENİLEME */
+    setInterval(() => { if (user && userData) runTransaction(ref(db, `users/${user.uid}/paint`), p => ((p || 0) < 30) ? (p || 0) + 1 : 30); }, 5000);
 </script>
 </body>
 </html>
