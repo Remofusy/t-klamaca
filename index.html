@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OynaKral</title>
+    <title>OynaKral Ultimate - Pro Versiyon</title>
     <style>
         /* GENEL TASARIM */
         * { box-sizing: border-box; outline: none; margin: 0; padding: 0; user-select: none; }
@@ -41,11 +41,11 @@
 
         /* OYUN DÜZENİ */
         #gameRoot, #voleybolRoot, #rplaceRoot {
-            height: 100vh; display: grid; grid-template-columns: 250px 1fr 280px;
+            height: 100vh; display: grid; grid-template-columns: 280px 1fr 280px;
         }
         .sidebar, .chat-sidebar { 
             background: #181818; padding: 10px; border-right: 1px solid #333; border-left: 1px solid #333; 
-            display: flex; flex-direction: column; 
+            display: flex; flex-direction: column; overflow-y: auto;
         }
         .chat-msgs { flex: 1; overflow-y: auto; background: #222; padding: 5px; margin-bottom: 5px; font-size: 12px; border: 1px solid #444; word-wrap: break-word; }
         
@@ -53,42 +53,25 @@
         .admin-name { color: #d559ff !important; font-weight: bold; text-shadow: 0 0 5px #d559ff; cursor: pointer; }
         .user-name { color: #aaa; font-weight: bold; cursor: pointer; }
         
-        /* RPLACE (BÜYÜTÜLMÜŞ) */
+        /* RPLACE */
         #rCenter { background: #222; overflow: auto; display: flex; justify-content: center; align-items: center; padding: 20px; }
         #canvas { 
-            display: grid; grid-template-columns: repeat(100, 20px); /* 100 Sütun */
-            width: 2000px; /* Genişlik Arttı */
+            display: grid; grid-template-columns: repeat(100, 20px); 
+            width: 2000px; 
             background: #fff; border: 5px solid #555; 
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-        .pixel { width: 20px; height: 20px; cursor: pointer; border: 1px solid rgba(0,0,0,0.05); }
+        .pixel { width: 20px; height: 20px; cursor: pointer; border: 1px solid rgba(0,0,0,0.03); }
         .pixel:hover { border: 1px solid #000; z-index: 10; }
-
-        /* VOLEYBOL LOBİ DÜZENİ */
-        .v-lobby-container {
-            display: flex; gap: 20px; align-items: flex-start; justify-content: center; height: 100%;
-        }
-        .v-panel {
-            background: #222; padding: 15px; border-radius: 8px; border: 1px solid #444; width: 300px;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        #vCanvas { background: #2a2a2a; border-bottom: 4px solid #fff; margin: auto; display: block; box-shadow: 0 0 20px #000; }
-        .color-select { display: flex; justify-content: center; gap: 8px; margin: 5px 0; }
-        .c-opt { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
-        .c-opt.selected { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 5px #fff; }
 
         /* POPUP & TOAST */
         .popup { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 9999; }
         #toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 20px; display: none; z-index: 100000; font-weight: bold; border: 1px solid #555; border-radius: 4px; }
         #warnToast { position: fixed; top: 0; left: 0; right: 0; background: #c0392b; color: #fff; text-align: center; padding: 5px; display: none; z-index: 100001; font-weight: bold; }
-        
-        #dmToast { 
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%); 
-            background: #2980b9; color: #fff; padding: 10px 20px; display: none; 
-            z-index: 100002; font-weight: bold; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); cursor: pointer;
-        }
+        #dmToast { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #2980b9; color: #fff; padding: 10px 20px; display: none; z-index: 100002; font-weight: bold; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); cursor: pointer; }
+        #adminAnnounce { position: fixed; top: 0; left: 0; right: 0; background: #8e44ad; color: #fff; text-align: center; padding: 10px; font-weight: bold; z-index: 200000; display: none; box-shadow: 0 0 20px #8e44ad; }
 
-        /* MARKET BUTONU (SOL ÜST) */
+        /* MARKET BUTONU */
         #marketBtn {
             position: absolute; left: 20px; top: 80px;
             width: 80px; height: 80px; background: #222; border: 2px solid #f1c40f;
@@ -97,30 +80,42 @@
         }
         #marketBtn:hover { transform: scale(1.05); background: #333; }
         
-        /* BİLDİRİM SUSTUR BUTONU (Sadece Menüde) */
         #notifToggle {
             position: absolute; left: 20px; top: 20px;
             width: 40px; height: 40px; background: #222; border: 1px solid #444;
             display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 50%; z-index: 101;
         }
 
-        /* ARKADAŞ SİSTEMİ */
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        .st-online { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
-        .st-afk { background: #f1c40f; }
-        .st-offline { background: #555; }
+        /* VOLEYBOL STYLES */
+        .v-control-box {
+            background: #222; padding: 10px; border-radius: 4px; margin-top: 10px; border: 1px solid #444;
+        }
+        .v-control-box h4 { color: #e67e22; margin-bottom: 5px; font-size: 13px; }
         
-        .friend-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
-        .friend-row:hover { background: #2a2a2a; }
-        .f-img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
+        .color-select { display: flex; justify-content: center; gap: 8px; margin: 5px 0; flex-wrap: wrap; }
+        .c-opt { width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; }
+        .c-opt.selected { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 5px #fff; }
+        
+        /* ARKADAŞ LİSTESİ STİLİ */
+        .friend-item { display: flex; justify-content: space-between; align-items: center; background: #333; padding: 5px 10px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
+        
+        /* STATUS DOTS */
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .st-green { background: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
+        .st-yellow { background: #f1c40f; }
+        .st-red { background: #c0392b; }
+
+        /* VOLEYBOL SAĞ PANEL */
+        #vStatsPanel { background: #222; padding: 10px; border: 1px solid #444; margin-bottom: 10px; border-radius: 4px; }
+        .leader-item { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; border-bottom: 1px solid #333; }
     </style>
 </head>
 <body>
 
+<div id="adminAnnounce">SİSTEM MESAJI</div>
 <div id="warnToast">UYARI</div>
 <div id="toast">Bildirim</div>
 <div id="dmToast" onclick="openDMFromToast()">Yeni Mesaj!</div>
-
 <div id="notifToggle" class="hidden" onclick="toggleNotifs()">🔔</div>
 
 <div id="topBar" class="hidden" onclick="openProfile()">
@@ -134,7 +129,7 @@
 <div class="center" id="authDiv">
     <div class="card">
         <h1 style="color: #d559ff; margin-bottom: 5px;">👑 OynaKral</h1>
-        <p style="color:#777; font-size:12px; margin-bottom:20px;">Ultimate Edition</p>
+        <p style="color:#777; font-size:12px; margin-bottom:20px;">Ultimate Pro</p>
         <input id="username" placeholder="Kullanıcı Adı">
         <input id="password" type="password" placeholder="Şifre">
         <button id="loginBtn">Giriş Yap</button>
@@ -152,7 +147,6 @@
         </div>
         <button onclick="signOutFunc()" style="background:#c0392b; margin-top:20px; width: auto; padding: 10px 30px;">Çıkış Yap</button>
     </div>
-    
     <div id="marketBtn" onclick="openNameMarket()">
         <span style="font-size: 24px;">🛒</span>
         <span>Market</span>
@@ -163,34 +157,28 @@
     <div class="card" style="width: 500px; text-align: left;">
         <div style="display:flex; gap:15px; border-bottom:1px solid #444; padding-bottom:15px;">
             <img id="bigProfImg" src="" style="width:80px; height:80px; border-radius:50%; border:2px solid #fff; cursor:pointer;" onclick="editProfilePic()">
-            <div>
+            <div style="flex:1;">
                 <h2 id="profName">-</h2>
                 <div style="color:#f1c40f;">🪙 <span id="profCoin">0</span> K-Coin</div>
-                <button onclick="editProfilePic()" style="width:auto; padding:5px 10px; font-size:11px; margin-top:5px; background:#444;">Düzenle</button>
+                <button id="profActionBtn" onclick="editProfilePic()" style="width:auto; padding:5px 10px; font-size:11px; margin-top:5px; background:#444;">Düzenle</button>
             </div>
         </div>
+        
+        <div style="display:flex; margin-top:10px; gap:5px;">
+            <button onclick="switchTab('quests')" style="flex:1; padding:5px; font-size:12px;">Görevler</button>
+            <button onclick="switchTab('friends')" style="flex:1; padding:5px; font-size:12px;">Arkadaşlar</button>
+        </div>
 
-        <div style="margin-top:15px;">
+        <div id="tabQuests" style="margin-top:15px;">
             <h4 style="color:#2ecc71; margin-bottom:5px;">📜 GÜNLÜK GÖREVLER</h4>
             <div id="questList" style="font-size:12px; color:#ccc;"></div>
         </div>
 
-        <div style="margin-top:20px; border-top:1px solid #444; padding-top:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4>👥 ARKADAŞLAR</h4>
-                <div>
-                    <button onclick="toggleFriendTab('list')" style="width:auto; padding:5px;">Liste</button>
-                    <button onclick="toggleFriendTab('add')" style="width:auto; padding:5px; background:#444;">Ekle/İstek</button>
-                </div>
-            </div>
-            <div id="friendListTab" style="height:150px; overflow-y:auto; background:#1a1a1a; margin-top:5px;"></div>
-            <div id="friendAddTab" class="hidden" style="margin-top:5px;">
-                <input id="friendInput" placeholder="Oyuncu adı gir..." style="padding:5px;">
-                <button onclick="sendFriendReq()" style="padding:5px; background:#27ae60;">İstek Gönder</button>
-                <div style="font-size:11px; margin-top:5px; color:#aaa;">Gelen İstekler:</div>
-                <div id="reqList" style="height:80px; overflow-y:auto; background:#1a1a1a;"></div>
-            </div>
+        <div id="tabFriends" style="margin-top:15px; display:none;">
+            <h4 style="color:#3498db; margin-bottom:5px;">👥 ARKADAŞLAR</h4>
+            <div id="friendList" style="height:150px; overflow-y:auto; border:1px solid #333; padding:5px;"></div>
         </div>
+
         <button onclick="document.getElementById('profilePop').style.display='none'" style="margin-top:15px; background:#444;">Kapat</button>
     </div>
 </div>
@@ -199,10 +187,8 @@
     <div class="card">
         <h3>Profili Düzenle</h3>
         <input id="newProfUrl" placeholder="Resim URL'si yapıştır">
-        
         <h4 style="margin-top:15px; text-align:left;">İsim Rengi Seç:</h4>
         <select id="colorSelector" onchange="changeNameColor(this.value)"></select>
-
         <button onclick="saveProfilePic()">Kaydet</button>
         <button onclick="document.getElementById('editProfPop').style.display='none'" style="background:#444;">İptal</button>
     </div>
@@ -231,22 +217,13 @@
     </div>
 </div>
 
-<div id="viewUserPop" class="popup">
-    <div class="card">
-        <img id="viewImg" src="" style="width:80px; height:80px; border-radius:50%; margin-bottom:10px;">
-        <h2 id="viewName">-</h2>
-        <p id="viewStats" style="color:#aaa; margin-top:5px;">-</p>
-        <button onclick="document.getElementById('viewUserPop').style.display='none'" style="margin-top:15px; background:#444;">Kapat</button>
-    </div>
-</div>
-
 <div id="gameRoot" class="hidden">
     <div class="sidebar">
         <button onclick="document.getElementById('marketPop').style.display='flex'" style="background:#f39c12;">🛒 Market</button>
         <button onclick="document.getElementById('casinoPop').style.display='flex'" style="background:#8e44ad;">🎰 Casino</button>
         <button class="backMenu" style="background:#444;">⬅ Menü</button>
         <div style="margin-top:15px; font-weight:bold; color:#f1c40f;">🏆 LİDERLER</div>
-        <div id="leaderboard" style="flex:1; background:#222; margin-top:10px; padding:5px; overflow-y:auto;">Yükleniyor...</div>
+        <div id="leaderboard" style="flex:1; background:#222; margin-top:10px; padding:5px; overflow-y:auto;"></div>
     </div>
     <div class="center">
         <div class="card">
@@ -257,7 +234,9 @@
     </div>
     <div class="chat-sidebar">
         <div class="chat-msgs" id="cMsgs"></div>
-        <input id="cIn" placeholder="Mesaj..."><button id="cSend">🚀</button>
+        <div style="display: flex; gap: 5px;">
+            <input id="cIn" placeholder="Mesaj..."><button id="cSend" style="width: 50px;">🚀</button>
+        </div>
     </div>
 </div>
 
@@ -300,7 +279,9 @@
     <div id="rCenter"><div id="canvas"></div></div>
     <div class="chat-sidebar">
         <div class="chat-msgs" id="rMsgs"></div>
-        <input id="rIn" placeholder="Mesaj..."><button id="rSend">🚀</button>
+        <div style="display: flex; gap: 5px;">
+            <input id="rIn" placeholder="Mesaj..."><button id="rSend" style="width: 50px;">🚀</button>
+        </div>
     </div>
     <div style="grid-column:1/4; background:#111; border-top:1px solid #444; display:flex; justify-content:center; align-items:center; height:60px; gap:20px; z-index:50;">
         <input type="color" id="color" value="#ff0000" style="width:50px; height:40px; border:none; padding:0; cursor:pointer;">
@@ -311,58 +292,84 @@
 <div id="voleybolRoot" class="hidden">
     <div class="sidebar">
         <button class="backMenu" style="background:#444;">⬅ Menü</button>
-        <div style="margin-top:20px; text-align:center;">
-             <h3 style="color:#e67e22;">Lobi</h3>
-             <div id="vDispCode" style="margin:10px 0; color:#f1c40f;"></div>
+        
+        <div id="vMenuSection">
+            <div class="v-control-box">
+                 <button id="vFindMatch" style="background:#d35400; padding:15px; font-size:16px;">🏆 REKABETÇİ</button>
+                 <div id="searchingMsg" class="hidden" style="color:#e67e22; margin-top:5px; text-align:center;">
+                    <div id="vSearchStatus">Rakip Aranıyor...</div>
+                    <button onclick="cancelMatch()" style="padding:5px; background:#444; width:auto; margin-top:5px;">İptal</button>
+                 </div>
+            </div>
+
+            <div class="v-control-box">
+                <h4>ÖZEL ODA</h4>
+                <button id="vCreate">Oda Kur</button>
+                <div style="display:flex; gap:5px;">
+                    <input id="vJoinCode" placeholder="Kod" style="margin-top:0;">
+                    <button id="vJoin" style="width:60px; margin-top:0;">Gir</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="vInGameInfo" class="hidden" style="margin-top:20px;">
+            <button onclick="quitMatch()" style="background:#c0392b;">🔴 Maçtan Çık (-5 Kupa)</button>
         </div>
     </div>
     
     <div class="center" style="background:#111; flex-direction:column;">
         
-        <div id="vLobby" class="v-lobby-container">
-            <div class="v-panel">
-                <h3>Oda İşlemleri</h3>
-                <button id="vFindMatch" style="background:#d35400; padding:15px; font-size:16px;">🏆 EŞLEŞME BUL</button>
-                <div id="searchingMsg" class="hidden" style="color:#e67e22;">
-                    Rakip Aranıyor... <br>
-                    <button onclick="cancelMatch()" style="padding:5px; background:#444; width:auto; margin-top:5px;">İptal</button>
-                </div>
-                <hr style="border:0; border-top:1px solid #444;">
-                <button id="vCreate">Özel Oda Kur</button>
-                <div style="display:flex; gap:5px;">
-                    <input id="vJoinCode" placeholder="Oda Kodu">
-                    <button id="vJoin" style="width:60px;">Gir</button>
-                </div>
-            </div>
-
-            <div class="v-panel">
-                <h3>Karakter Ayarları</h3>
+        <div id="vCustomDiv" class="card" style="width: 400px;">
+            <h2>🏐 HAZIRLIK</h2>
+            <div style="margin:20px 0;">
+                <h4>Karakter Rengi</h4>
                 <div class="color-select">
                     <div class="c-opt selected" style="background:#3498db;" onclick="setSkin('#3498db',this)"></div>
                     <div class="c-opt" style="background:#e74c3c;" onclick="setSkin('#e74c3c',this)"></div>
                     <div class="c-opt" style="background:#2ecc71;" onclick="setSkin('#2ecc71',this)"></div>
                     <div class="c-opt" style="background:#f1c40f;" onclick="setSkin('#f1c40f',this)"></div>
                 </div>
-                <h4 style="color:#aaa; font-size:12px;">Top Rengi (Sadece Host)</h4>
+            </div>
+            <div style="margin:20px 0;">
+                <h4>Top Rengi</h4>
                 <div class="color-select">
                     <div class="c-opt selected" style="background:#fff;" onclick="setBall('#fff',this)"></div>
                     <div class="c-opt" style="background:#e67e22;" onclick="setBall('#e67e22',this)"></div>
-                    <div class="c-opt" style="background:#9b59b6;" onclick="setBall('#9b59b6',this)"></div>
                 </div>
             </div>
+            <p style="color:#777; font-size:12px;">Ranked maçta AFK kalma, atılırsın!</p>
+        </div>
+
+        <div id="vWaitScreen" class="hidden" style="text-align:center;">
+             <h2 style="color:#f1c40f;" id="vDispCode"></h2>
+             <div id="vWaitNames" style="font-size:20px; margin:20px; font-weight:bold;">
+                 <span id="vP1Name" style="color:#3498db">Host</span> VS <span id="vP2Name" style="color:#777">Bekleniyor...</span>
+             </div>
+             <button id="vStartBtn" class="hidden" style="background:#2ecc71; margin-top:20px; padding:15px; font-size:20px;">OYUNU BAŞLAT</button>
         </div>
 
         <div id="vGameArea" class="hidden" style="text-align:center;">
              <div id="vPlayers" style="font-weight:bold; margin-bottom:5px; color:#fff;"></div>
-             <canvas id="vCanvas" width="800" height="400"></canvas>
-             <button id="vStartBtn" class="hidden" style="background:#2ecc71; margin-top:10px; width:200px;">BAŞLAT</button>
+             <canvas id="vCanvas" width="800" height="400" style="background:#2a2a2a; border-bottom:4px solid #fff; box-shadow:0 0 20px #000;"></canvas>
         </div>
-
     </div>
     
-    <div class="chat-sidebar" id="vChatBox">
-        <div class="chat-msgs" id="vMsgs"></div>
-        <input id="vIn" placeholder="..."><button id="vSend">🚀</button>
+    <div class="chat-sidebar">
+        <div id="vRightMenu" style="flex:1; display:flex; flex-direction:column;">
+            <div id="vStatsPanel">
+                <div style="color:#e67e22; font-weight:bold; margin-bottom:5px;">🏆 KUPAN</div>
+                <div style="font-size:20px;" id="myTrophyRight">0</div>
+            </div>
+            <div style="color:#3498db; font-weight:bold; margin-bottom:5px;">🌍 TOP 10 KUPA</div>
+            <div id="vLeaderboard" style="flex:1; overflow-y:auto; font-size:12px;"></div>
+        </div>
+
+        <div id="vChatBox" class="hidden" style="flex:1; display:flex; flex-direction:column;">
+            <div class="chat-msgs" id="vMsgs"></div>
+            <div style="display: flex; gap: 5px;">
+                <input id="vIn" placeholder="..."><button id="vSend" style="width: 50px;">🚀</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -374,18 +381,10 @@
     </div>
 </div>
 
-<div id="afkPop" class="popup">
-    <div class="card">
-        <h2 style="color:#e74c3c;">⚠️ UYARI</h2>
-        <p>5 dakikadır hareketsizsin.</p>
-        <p>Oyundan atılacaksın!</p>
-    </div>
-</div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, set, push, onValue, runTransaction, get, remove, update, onDisconnect, serverTimestamp, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, runTransaction, get, remove, update, onDisconnect, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const app = initializeApp({
         apiKey: "AIzaSyCGUe_LPKRAVz1IoqMDn-8ie9RWCrVRQLs",
@@ -397,14 +396,12 @@
 
     let user = null, userData = null;
     let clickCount = 0, lastClickTime = Date.now();
-    let afkTimer = 0, isAfk = false;
     let mySkin = "#3498db", myBall = "#fff";
     let curRoom = null, isHost = false, roomData = null, gameEnded = false;
-    let currentDmTarget = null;
+    let currentDmTarget = null, currentViewProf = null;
     let notifsEnabled = true;
-    
-    // Ses
-    const pingSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+    let knownActiveFriends = new Set();
+    let lastVInput = Date.now(); // AFK Kontrolü için
 
     // --- YARDIMCI ---
     window.showToast = (msg, color="#333") => {
@@ -412,14 +409,16 @@
         t.innerText = msg; t.style.background = color; t.style.display = "block";
         setTimeout(() => t.style.display = "none", 3000);
     };
-
+    window.showGlobalNotif = (msg) => {
+        const t = document.getElementById("adminAnnounce");
+        t.innerText = msg; t.style.display = "block";
+        setTimeout(() => t.style.display = "none", 4000);
+    };
     window.formatNum = (n) => {
-        if (n < 1000) return n;
-        const suffixes = ["", "k", "M", "B", "T"];
-        const suffixNum = Math.floor(("" + Math.floor(n)).length / 3);
-        let shortValue = parseFloat((suffixNum != 0 ? (n / Math.pow(1000, suffixNum)) : n).toPrecision(3));
-        if (shortValue % 1 != 0) { shortValue = shortValue.toFixed(1); }
-        return shortValue + suffixes[suffixNum];
+        if (n < 1000) return Math.floor(n);
+        if (n < 1000000) return (n / 1000).toFixed(1).replace('.0','') + 'k';
+        if (n < 1000000000) return (n / 1000000).toFixed(2).replace('.00','') + 'M';
+        return (n / 1000000000).toFixed(2) + 'B';
     }
 
     // --- AUTH ---
@@ -436,88 +435,51 @@
             document.getElementById("topBar").classList.remove("hidden");
             document.getElementById("notifToggle").classList.remove("hidden");
             initUser();
+            startPresence();
         }
     });
 
     function initUser() {
         const uRef = ref(db, "users/" + user.uid);
-        
         onValue(uRef, s => {
             userData = s.val();
             if (!userData) return;
-            if (userData.banned) {
-                alert("BU HESAP YASAKLANMIŞTIR.");
-                signOut(auth).then(()=>location.reload());
-                return;
-            }
-            if (userData.kicked) { update(uRef, {kicked:false}); location.reload(); }
-
+            if (userData.banned) { alert("YASAKLANDINIZ."); signOut(auth).then(()=>location.reload()); return; }
+            
             document.getElementById("headerName").innerText = userData.username;
             document.getElementById("headerName").style.color = userData.nameColor || "#aaa";
             document.getElementById("headTrophy").innerText = userData.trophies || 0;
+            document.getElementById("myTrophyRight").innerText = userData.trophies || 0;
             const myImg = userData.img || `https://api.dicebear.com/7.x/initials/svg?seed=${userData.username}`;
             document.getElementById("headerImg").src = myImg;
-
-            // Profil Popup
+            document.getElementById("bigProfImg").src = myImg;
+            
+            // Profil Verileri
             document.getElementById("profName").innerText = userData.username;
             document.getElementById("profName").style.color = userData.nameColor || "#aaa";
             document.getElementById("profCoin").innerText = userData.kcoin || 0;
-            document.getElementById("bigProfImg").src = myImg;
-
-            // Oyun Verileri
             document.getElementById("scoreDisp").innerText = formatNum(userData.score || 0) + " Altın";
             document.getElementById("powerDisp").innerText = userData.power || 1;
             document.getElementById("autoDisp").innerText = userData.autoClick || 0;
-            
-            document.getElementById("powerPrice").innerText = formatNum(Math.floor(100 * Math.pow(1.05, (userData.power||1)-1)));
-            document.getElementById("autoPrice").innerText = formatNum(Math.floor(200 * Math.pow(1.10, userData.autoClick||0)));
             document.getElementById("paintText").innerText = userData.paint || 0;
 
+            document.getElementById("powerPrice").innerText = formatNum(Math.floor(100 * Math.pow(1.05, (userData.power||1)-1)));
+            document.getElementById("autoPrice").innerText = formatNum(Math.floor(200 * Math.pow(1.10, userData.autoClick||0)));
+
             renderQuests();
+            renderFriends(); // Arkadaş listesini yenile
             loadColorSelector();
         });
         
-        // Oto Tıklama
         setInterval(() => {
             if (!document.getElementById("gameRoot").classList.contains("hidden") && userData && userData.autoClick > 0) {
                 runTransaction(ref(db, `users/${user.uid}/score`), s => (s||0) + userData.autoClick);
             }
         }, 1000);
 
-        // AFK Takibi
-        window.onmousemove = window.onkeydown = () => { afkTimer = 0; if(isAfk) { isAfk = false; document.getElementById("afkPop").style.display="none"; } };
-        setInterval(() => {
-            afkTimer++;
-            update(ref(db, `users/${user.uid}/lastActive`), Date.now());
-            if (afkTimer > 300 && document.getElementById("gameSelect").classList.contains("hidden")) {
-                isAfk = true;
-                document.getElementById("afkPop").style.display = "flex";
-            }
-        }, 1000);
-
         checkDailyQuests();
         
-        // Arkadaş İstekleri
-        onValue(ref(db, `users/${user.uid}/requests`), s => {
-            const reqs = s.val();
-            const div = document.getElementById("reqList");
-            div.innerHTML = "";
-            if(reqs) {
-                Object.keys(reqs).forEach(key => {
-                    const rName = reqs[key];
-                    div.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333;">
-                        <span>${rName}</span>
-                        <div>
-                            <button onclick="acceptFriend('${key}','${rName}')" style="width:auto; padding:2px 5px; background:#2ecc71;">✓</button>
-                            <button onclick="rejectFriend('${key}')" style="width:auto; padding:2px 5px; background:#c0392b;">X</button>
-                        </div>
-                    </div>`;
-                    if(notifsEnabled) showToast(`${rName} arkadaşlık isteği attı!`, "#2980b9");
-                });
-            }
-        });
-
-        // BİLDİRİM LISTENER
+        // Bildirim Listener (DM ve Global)
         onValue(ref(db, `users/${user.uid}/notifications`), s => {
             const n = s.val();
             if (n && notifsEnabled) {
@@ -530,14 +492,35 @@
                     setTimeout(()=>t.style.display="none", 4000);
                 } else {
                     showToast(n.msg, n.color || "#e67e22");
-                    try{ pingSound.play(); }catch(e){}
                 }
                 remove(ref(db, `users/${user.uid}/notifications`));
             }
         });
+        
+        // Global Admin Duyuruları
+        onValue(ref(db, 'server/announcement'), s => {
+            const d = s.val();
+            if(d && (Date.now() - d.time < 5000)) {
+                showGlobalNotif(d.msg);
+            }
+        });
     }
 
-    // --- CHAT VE KOMUT SİSTEMİ ---
+    // --- AKTİFLİK SİSTEMİ (Presence) ---
+    function startPresence() {
+        const updatePresence = () => {
+            if(user) update(ref(db, `users/${user.uid}`), { lastActive: Date.now() });
+            lastVInput = Date.now(); // AFK sayacı sıfırla
+        };
+        document.addEventListener('mousemove', () => { if(Date.now()%5000 < 100) updatePresence(); }); // Spam engelleme
+        document.addEventListener('click', updatePresence);
+        document.addEventListener('keydown', updatePresence);
+        
+        // Çıkınca kırmızı olması için (Firebase onDisconnect)
+        // Ancak bu sadece bağlantı kopunca çalışır, "Boşta" (Sarı) için süre kontrolü yapacağız.
+    }
+
+    // --- CHAT & ADMIN KOMUTLARI ---
     function setupChat(elId, path, inId, btnId) {
         onValue(ref(db, path), s => {
             const el = document.getElementById(elId); el.innerHTML="";
@@ -545,43 +528,41 @@
             Object.values(d).forEach(m => {
                 const cls = m.u==='remobaba'?'admin-name':'user-name';
                 el.innerHTML += `<div><b class="${cls}" onclick="openProfileByName('${m.u}')">${m.u}:</b> ${m.t}</div>`;
-                // MENTION
-                if(m.t.includes("@" + userData.username) && m.u !== userData.username) {
-                     set(ref(db, `users/${user.uid}/notifications`), { type:'mention', msg: `📢 ${m.u} seni etiketledi!`, color: "#9b59b6" });
-                }
             });
-            el.scrollTop = el.scrollHeight;
+            setTimeout(() => el.scrollTop = el.scrollHeight, 100);
         });
 
         document.getElementById(btnId).onclick = () => {
             const inp = document.getElementById(inId);
             const msg = inp.value.trim();
             if(!msg) return;
-            
-            // ADMIN KOMUTLARI
-            if (msg.startsWith("/") && userData.username === "remobaba") {
+
+            // ADMIN KOMUTLARI (ÖZEL)
+            if (msg.startsWith("/")) {
+                if (userData.username !== "remobaba") { showToast("Yetkiniz Yok!", "#c0392b"); inp.value=""; return; }
                 const parts = msg.split(" ");
                 const cmd = parts[0];
                 const target = parts[1];
-
+                
                 if (cmd === "/temizle") {
-                    remove(ref(db, path));
-                    push(ref(db, path), {u: "SİSTEM", t: "Chat Remobaba tarafından temizlendi."});
-                } 
-                else if (cmd === "/yasakla" && target) {
-                    findUserByName(target, (uid) => {
-                         if(uid) {
-                             update(ref(db, `users/${uid}`), { banned: true });
-                             showToast(`${target} yasaklandı.`, "#c0392b");
-                         }
-                    });
+                    set(ref(db, path), {});
+                    set(ref(db, 'server/announcement'), { msg: "SOHBET TEMİZLENDİ!", time: Date.now() });
                 }
-                else if (cmd === "/sustur" && target) {
-                    findUserByName(target, (uid) => {
-                         if(uid) {
-                             update(ref(db, `users/${uid}`), { muted: true });
-                             showToast(`${target} susturuldu.`, "#f1c40f");
-                         }
+                else if (target) {
+                    findUidByName(target).then(uid => {
+                        if(!uid) { showToast("Kullanıcı bulunamadı"); return; }
+                        if (cmd === "/yasakla") {
+                            update(ref(db, `users/${uid}`), { banned: true });
+                            set(ref(db, 'server/announcement'), { msg: `${target} YASAKLANDI!`, time: Date.now() });
+                        }
+                        else if (cmd === "/sustur") {
+                            update(ref(db, `users/${uid}`), { muted: true });
+                            set(ref(db, 'server/announcement'), { msg: `${target} SUSTURULDU!`, time: Date.now() });
+                        }
+                        else if (cmd === "/affet") {
+                            update(ref(db, `users/${uid}`), { banned: false, muted: false });
+                            set(ref(db, 'server/announcement'), { msg: `${target} AFFEDİLDİ!`, time: Date.now() });
+                        }
                     });
                 }
                 inp.value = "";
@@ -589,24 +570,23 @@
             }
 
             if(userData.muted) { showToast("Susturuldun!"); return; }
-
             push(ref(db, path), {u: userData.username, t: msg}); 
             inp.value="";
         };
     }
-    setupChat("cMsgs", "chat/tik", "cIn", "cSend");
-    setupChat("rMsgs", "chat/rpl", "rIn", "rSend");
-
-    function findUserByName(name, callback) {
-        get(ref(db, "users")).then(s => {
-            const all = s.val();
-            let uid = null;
-            Object.keys(all).forEach(k => { if(all[k].username === name) uid = k; });
-            callback(uid);
+    
+    function findUidByName(name) {
+        return get(ref(db, "users")).then(s => {
+            const all = s.val(); let found = null;
+            if(all) Object.keys(all).forEach(k => { if(all[k].username === name) found = k; });
+            return found;
         });
     }
 
-    // --- MARKET VE RENKLER ---
+    setupChat("cMsgs", "chat/tik", "cIn", "cSend");
+    setupChat("rMsgs", "chat/rpl", "rIn", "rSend");
+
+    // --- MARKET ---
     window.loadColorSelector = () => {
         const sel = document.getElementById("colorSelector");
         sel.innerHTML = "";
@@ -618,12 +598,7 @@
              sel.appendChild(opt);
         });
     };
-
-    window.changeNameColor = (val) => {
-        update(ref(db, `users/${user.uid}`), { nameColor: val });
-        showToast("İsim rengi güncellendi.");
-    }
-
+    window.changeNameColor = (val) => { update(ref(db, `users/${user.uid}`), { nameColor: val }); showToast("Renk Değişti!"); }
     window.openNameMarket = () => {
         const colors = ["#e74c3c", "#3498db", "#f1c40f", "#2ecc71", "#9b59b6", "#e67e22"];
         const todayIdx = new Date().getDate() % colors.length;
@@ -635,19 +610,14 @@
         
         window.buyNameColor = () => {
             if ((userData.kcoin||0) >= 50) {
-                // Rengi diziye ekle
                 runTransaction(ref(db, `users/${user.uid}`), u => {
-                    if(!u) return;
-                    if(u.kcoin < 50) return;
+                    if(!u || u.kcoin < 50) return;
                     u.kcoin -= 50;
                     if(!u.ownedColors) u.ownedColors = ["#aaa"];
                     if(!u.ownedColors.includes(color)) u.ownedColors.push(color);
                     return u;
-                }).then(() => {
-                    showToast("Renk Alındı!", "#2ecc71"); 
-                    document.getElementById("colorMarketPop").style.display = "none";
-                });
-            } else showToast("Para Yetmiyor (50 K-Coin)!");
+                }).then(() => { showToast("Renk Alındı!", "#2ecc71"); document.getElementById("colorMarketPop").style.display = "none"; });
+            } else showToast("Para Yetmiyor!");
         };
     };
 
@@ -666,23 +636,9 @@
         runTransaction(ref(db, "users/" + user.uid), d => { if(d) d.score = (d.score||0) + (d.power||1); return d; });
         updateQuest('click');
     };
-
-    function loadLeaderboard() {
-        const q = query(ref(db, "users"), orderByChild("score"), limitToLast(10));
-        onValue(q, s => {
-            const div = document.getElementById("leaderboard");
-            div.innerHTML = "";
-            let list = [];
-            s.forEach(c => { list.push(c.val()); });
-            list.reverse().forEach((u, i) => {
-                div.innerHTML += `<div class="lb-item" style="padding:5px; border-bottom:1px solid #333;"><span>${i+1}. ${u.username}</span><span style="color:#f1c40f; float:right;">${formatNum(u.score)}</span></div>`;
-            });
-        });
-    }
-
+    
     document.getElementById("buyPower").onclick = () => buyUpgrade("power", 100, 1.05);
     document.getElementById("buyAuto").onclick = () => buyUpgrade("autoClick", 200, 1.10);
-
     function buyUpgrade(type, base, mult) {
         runTransaction(ref(db, "users/" + user.uid), d => {
             if(!d) return;
@@ -692,29 +648,26 @@
             return d;
         });
     }
-    
-    // --- RPLACE (BÜYÜK) ---
+
+    // --- RPLACE ---
     const cvs = document.getElementById("canvas");
-    // 100x50 Grid = 5000 Pixel (Daha yönetilebilir)
-    for(let i=0; i<5000; i++){
+    for(let i=0; i<10000; i++){
         const p=document.createElement("div"); p.className="pixel";
         p.onclick=()=>{
             if(userData.paint>0){
                 update(ref(db,`users/${user.uid}`), {paint: userData.paint-1});
                 set(ref(db,`rplace/pixels/${i}`), document.getElementById("color").value);
                 updateQuest('rplace');
-            } else showToast("Boyan bitti! Bekle...");
+            } else showToast("Boyan bitti!");
         };
         cvs.appendChild(p);
     }
     onValue(ref(db, "rplace/pixels"), s=>{
         const d=s.val(); if(d) Object.keys(d).forEach(k=>cvs.children[k].style.background=d[k]);
     });
-    setInterval(() => { 
-        if(userData) runTransaction(ref(db, `users/${user.uid}/paint`), p => ((p||0)<64 ? (p||0)+1 : 64)); 
-    }, 5000);
+    setInterval(() => { if(userData) runTransaction(ref(db, `users/${user.uid}/paint`), p => ((p||0)<64 ? (p||0)+1 : 64)); }, 5000);
 
-    // --- VOLEYBOL (FİZİK FİXLİ) ---
+    // --- VOLEYBOL ---
     let keys = {};
     window.addEventListener("keydown", e => keys[e.code] = true);
     window.addEventListener("keyup", e => keys[e.code] = false);
@@ -722,20 +675,33 @@
     window.setSkin = (c,e) => { mySkin=c; document.querySelectorAll('.color-select .c-opt').forEach(x=>x.classList.remove('selected')); e.classList.add('selected'); };
     window.setBall = (c,e) => { myBall=c; e.parentNode.querySelectorAll('.c-opt').forEach(x=>x.classList.remove('selected')); e.classList.add('selected'); };
 
-    document.getElementById("vCreate").onclick = () => createVroom(Math.floor(1000+Math.random()*9000), false);
+    document.getElementById("vCreate").onclick = () => { createVroom(Math.floor(1000+Math.random()*9000), false); };
     
+    let searchTimeout = null;
+
     document.getElementById("vFindMatch").onclick = () => {
         document.getElementById("searchingMsg").classList.remove("hidden");
+        document.getElementById("vSearchStatus").innerText = "Rakip Aranıyor...";
+        
         get(ref(db, "rooms")).then(s => {
             const rooms = s.val();
             let found = null;
+            // Bekleyen ranked oda bul
             if (rooms) Object.keys(rooms).forEach(k => { if (rooms[k].status === "searching" && rooms[k].hostId !== user.uid) found = k; });
             
             if (found) {
-                update(ref(db, `rooms/${found}`), { guest: userData.username, guestId: user.uid, guestSkin: mySkin, status: "playing", type: "ranked" });
+                // EŞLEŞME BULUNDU - 5 SN BEKLE
+                update(ref(db, `rooms/${found}`), { 
+                    guest: userData.username, 
+                    guestId: user.uid, 
+                    guestSkin: mySkin, 
+                    status: "prematch" // Yeni durum: prematch
+                });
                 joinVroom(found);
             } else {
-                createVroom("R-" + Math.floor(Math.random()*10000), true);
+                // ODA OLUŞTUR (GİZLİ ID)
+                const newId = push(ref(db, "rooms")).key; // Random ID
+                createVroom(newId, true);
             }
         });
     };
@@ -744,20 +710,43 @@
         if(curRoom) remove(ref(db, `rooms/${curRoom}`));
         document.getElementById("searchingMsg").classList.add("hidden");
         curRoom = null;
+        document.getElementById("vGameArea").classList.add("hidden");
+        document.getElementById("vWaitScreen").classList.add("hidden");
+        document.getElementById("vCustomDiv").classList.remove("hidden");
+        document.getElementById("vInGameInfo").classList.add("hidden");
+        document.getElementById("vMenuSection").classList.remove("hidden"); // Menüyü geri getir
+    };
+    
+    // Maçtan Çıkma (Ceza var)
+    window.quitMatch = () => {
+        if(curRoom && roomData) {
+            if(roomData.type === 'ranked') {
+                 // Kendine ceza ver
+                 runTransaction(ref(db, `users/${user.uid}`), u => {
+                    u.trophies = Math.max(0, (u.trophies||0)-5); return u;
+                 });
+            }
+            remove(ref(db, `rooms/${curRoom}`)); // Odayı patlat, diğer kişi endGame ile kazanır
+            location.reload();
+        }
     };
 
     function createVroom(id, isRanked) {
         curRoom = id; isHost = true; gameEnded = false;
         const rData = {
             host: userData.username, hostId: user.uid, hostSkin: mySkin, ballColor: myBall,
+            guest: "Bekleniyor...", guestId: "", 
             status: isRanked ? "searching" : "waiting", type: isRanked ? "ranked" : "custom",
-            p1x: 100, p1y: 360, p2x: 650, p2y: 360, bx: 400, by: 100, bvx: 0, bvy: 0, s1: 0, s2: 0,
-            ballActive: false // Top bekler
+            p1x: 100, p1y: 360, p2x: 650, p2y: 360, 
+            bx: 400, by: 250, bvx: 0, bvy: 0, 
+            s1: 0, s2: 0,
+            ballActive: false,
+            createdAt: Date.now()
         };
         const rRef = ref(db, `rooms/${id}`);
         set(rRef, rData);
         onDisconnect(rRef).remove();
-        if(!isRanked) joinVroom(id);
+        joinVroom(id);
     }
 
     document.getElementById("vJoin").onclick = () => {
@@ -770,33 +759,72 @@
 
     function joinVroom(id) {
         curRoom = id;
-        document.getElementById("vLobby").classList.add("hidden");
-        document.getElementById("vChatBox").classList.remove("hidden");
+        
+        // EKRAN AYARLARI
+        document.getElementById("vCustomDiv").classList.add("hidden"); 
+        document.getElementById("vInGameInfo").classList.remove("hidden"); 
+        document.getElementById("vMenuSection").classList.add("hidden"); // Menüyü gizle
+        document.getElementById("vRightMenu").classList.add("hidden"); // Leaderboard gizle
+        document.getElementById("vChatBox").classList.remove("hidden"); // Chat göster
+
+        document.getElementById("vWaitScreen").classList.remove("hidden"); 
+        document.getElementById("vGameArea").classList.add("hidden");
+        
+        // Ranked ise kodu gizle
+        onValue(ref(db, `rooms/${id}`), s => {
+            roomData = s.val();
+            if(!roomData) return;
+            if(roomData.type === 'ranked') document.getElementById("vDispCode").innerText = "REKABETÇİ MAÇ";
+            else document.getElementById("vDispCode").innerText = "ODA: " + id;
+        }, {onlyOnce: true});
+        
         setupChat("vMsgs", "vchat/"+id, "vIn", "vSend");
 
         onValue(ref(db, `rooms/${id}`), s => {
             roomData = s.val();
+            
+            // ODA KAPANDIYSA/SİLİNDİYSE
             if (!roomData) { 
-                if(!gameEnded && !isHost && document.getElementById("vGameArea").classList.contains("hidden") === false) endGame("RAKİP AYRILDI", "Hükmen kazandın!", true); 
+                if(!gameEnded && !document.getElementById("vGameArea").classList.contains("hidden")) {
+                    // Oyun içindeyken oda silindiyse (Rakip çıktı)
+                    endGame("RAKİP KAÇTI!", "Hükmen kazandın.", true); 
+                } else if (!gameEnded) {
+                    // Bekleme ekranındayken oda silindiyse
+                    location.reload();
+                }
                 return; 
             }
 
-            // OYUN BAŞLADI MI?
+            document.getElementById("vP1Name").innerText = roomData.host;
+            document.getElementById("vP2Name").innerText = roomData.guest || "Bekleniyor...";
+
+            // 5 SANİYE SAYACI (Ranked için)
+            if (roomData.status === "prematch") {
+                 document.getElementById("searchingMsg").classList.remove("hidden");
+                 document.getElementById("vSearchStatus").innerText = `Maç Bulundu! Başlıyor...`;
+                 
+                 // Sadece Host sayacı başlatır
+                 if (isHost && !searchTimeout) {
+                     searchTimeout = setTimeout(() => {
+                         update(ref(db, `rooms/${curRoom}`), { status: "playing", ballActive: true });
+                     }, 5000);
+                 }
+            }
+
             if (roomData.status === "playing") {
                 document.getElementById("searchingMsg").classList.add("hidden");
-                document.getElementById("vLobby").classList.add("hidden");
+                document.getElementById("vWaitScreen").classList.add("hidden");
                 document.getElementById("vGameArea").classList.remove("hidden");
-                // Skor ve isimler
                 document.getElementById("vPlayers").innerHTML = `<span style="color:${roomData.hostSkin}">${roomData.host}</span> (${roomData.s1}) - (${roomData.s2}) <span style="color:${roomData.guestSkin}">${roomData.guest}</span>`;
             } 
             else if (roomData.status === "waiting") {
-                 document.getElementById("vDispCode").innerText = "ODA KODU: " + id;
-                 if(isHost && roomData.guest) document.getElementById("vStartBtn").classList.remove("hidden");
+                 if(isHost && roomData.guestId) document.getElementById("vStartBtn").classList.remove("hidden");
+                 else document.getElementById("vStartBtn").classList.add("hidden");
             } 
             else if (roomData.status === "finished") {
                 const imP1 = roomData.hostId === user.uid;
                 const iWon = (imP1 && roomData.s1 >= 10) || (!imP1 && roomData.s2 >= 10);
-                endGame(iWon ? "KAZANDIN!" : "KAYBETTİN!", iWon ? "+5 Kupa" : "...", iWon);
+                endGame(iWon ? "KAZANDIN!" : "KAYBETTİN!", iWon ? "+5 Kupa" : "-5 Kupa", iWon);
             }
         });
     }
@@ -807,107 +835,80 @@
     };
 
     const ctx = document.getElementById("vCanvas").getContext("2d");
-    let v_vy = 0, onG = false;
+    let v_vy = 0;
 
     // FİZİK DÖNGÜSÜ
     setInterval(() => {
         if (!curRoom || !roomData || roomData.status !== "playing" || gameEnded) return;
+        
+        // AFK KONTROLÜ (Ranked Sadece)
+        if (roomData.type === "ranked" && Date.now() - lastVInput > 30000) {
+            // Ben AFK kaldım
+            quitMatch(); // Direkt çıkış cezası uygula
+            return;
+        }
 
         let mx = isHost ? roomData.p1x : roomData.p2x;
         let my = isHost ? roomData.p1y : roomData.p2y;
         
-        // HAREKET
-        if(keys['ArrowLeft'] || keys['KeyA']) mx -= 8;
-        if(keys['ArrowRight'] || keys['KeyD']) mx += 8;
+        if(keys['ArrowLeft'] || keys['KeyA']) { mx -= 8; lastVInput = Date.now(); }
+        if(keys['ArrowRight'] || keys['KeyD']) { mx += 8; lastVInput = Date.now(); }
+        if((keys['ArrowUp'] || keys['KeyW']) && my >= 360) { v_vy = -14; lastVInput = Date.now(); }
         
-        // ZIPLAMA (Zemin kontrolü)
-        if((keys['ArrowUp'] || keys['KeyW']) && my >= 360) { v_vy = -14; }
+        v_vy += 0.8; my += v_vy;
+        if (my >= 360) { my = 360; v_vy = 0; } 
         
-        v_vy += 0.8; // Yerçekimi
-        my += v_vy;
-        
-        if (my >= 360) { my = 360; v_vy = 0; } // Zemin
-        
-        // Sınırlar
         if (isHost) { if(mx<25) mx=25; if(mx>375) mx=375; }
         else { if(mx<425) mx=425; if(mx>775) mx=775; }
 
         if (isHost) {
-            let bx = roomData.bx;
-            let by = roomData.by;
-            let bvx = roomData.bvx;
-            let bvy = roomData.bvy;
+            let bx = roomData.bx, by = roomData.by, bvx = roomData.bvx, bvy = roomData.bvy;
+            if(roomData.ballActive || (bvx!==0 || bvy!==0)) { bx += bvx; by += bvy; bvy += 0.35; }
 
-            // TOP SADECE OYUN AKTİFKEN HAREKET EDER
-            if(roomData.ballActive || (bvx!==0 || bvy!==0)) {
-                bx += bvx;
-                by += bvy;
-                bvy += 0.35; // Top yerçekimi
-            }
+            // HITBOX 55
+            if (Math.abs(bx - roomData.p1x) < 55 && Math.abs(by - roomData.p1y) < 55) { bvy = -12; bvx = (bx - roomData.p1x) * 0.45; if(!roomData.ballActive) update(ref(db, `rooms/${curRoom}`), {ballActive:true}); }
+            if (Math.abs(bx - roomData.p2x) < 55 && Math.abs(by - roomData.p2y) < 55) { bvy = -12; bvx = (bx - roomData.p2x) * 0.45; if(!roomData.ballActive) update(ref(db, `rooms/${curRoom}`), {ballActive:true}); }
 
-            // Çarpışma P1
-            if (Math.abs(bx - roomData.p1x) < 40 && Math.abs(by - roomData.p1y) < 40) {
-                bvy = -12; bvx = (bx - roomData.p1x) * 0.4;
-                if(!roomData.ballActive) update(ref(db, `rooms/${curRoom}`), {ballActive:true});
-            }
-            // Çarpışma P2
-            if (Math.abs(bx - roomData.p2x) < 40 && Math.abs(by - roomData.p2y) < 40) {
-                bvy = -12; bvx = (bx - roomData.p2x) * 0.4;
-                if(!roomData.ballActive) update(ref(db, `rooms/${curRoom}`), {ballActive:true});
-            }
-
-            // Duvarlar
             if (bx < 15 || bx > 785) bvx *= -1;
             if (by < 10) { by = 10; bvy *= -0.8; }
-            
-            // FİLE
-            // Üstten çarpma
-            if (bx > 390 && bx < 410 && by > 250) {
-                if (by < 260) { bvy *= -1; by=250; } // Üstten sekme
-                else { bvx *= -1; } // Yandan sekme
-            }
+            if (bx > 390 && bx < 410 && by > 250) { if (by < 260) { bvy *= -1; by=250; } else { bvx *= -1; } }
 
-            // Sayı
             if (by > 385) {
                 const p1Win = bx > 400; 
                 let s1 = roomData.s1 + (p1Win?1:0);
                 let s2 = roomData.s2 + (p1Win?0:1);
                 
                 if (s1 >= 10 || s2 >= 10) update(ref(db, `rooms/${curRoom}`), { s1, s2, status: 'finished' });
-                else {
-                    // Sayıdan sonra top reset ama havada asılı
-                    update(ref(db, `rooms/${curRoom}`), { s1, s2, bx: p1Win?600:200, by: 100, bvx:0, bvy:0, ballActive: false });
-                }
-            } else {
-                update(ref(db, `rooms/${curRoom}`), { bx, by, bvx, bvy, p1x: mx, p1y: my });
-            }
-        } else {
-            // Guest sadece kendi konumunu atar
-            update(ref(db, `rooms/${curRoom}`), { p2x: mx, p2y: my });
-        }
+                else update(ref(db, `rooms/${curRoom}`), { s1, s2, bx: p1Win?600:200, by: 250, bvx:0, bvy:0, ballActive: false });
+            } else update(ref(db, `rooms/${curRoom}`), { bx, by, bvx, bvy, p1x: mx, p1y: my });
+        } else update(ref(db, `rooms/${curRoom}`), { p2x: mx, p2y: my });
         drawGame(roomData);
     }, 20);
 
     function drawGame(d) {
         ctx.clearRect(0,0,800,400);
-        // File
         ctx.fillStyle="#ccc"; ctx.fillRect(395, 250, 10, 150);
-        
-        // P1
         ctx.fillStyle = d.hostSkin; ctx.fillRect(d.p1x-25, d.p1y-25, 50, 50);
-        // P2
         ctx.fillStyle = d.guestSkin || "#fff"; ctx.fillRect(d.p2x-25, d.p2y-25, 50, 50);
-
-        // Top
         ctx.fillStyle = d.ballColor || "#fff"; ctx.beginPath(); ctx.arc(d.bx, d.by, 12, 0, Math.PI*2); ctx.fill();
     }
 
     function endGame(title, desc, win) {
         if(gameEnded) return; gameEnded = true;
-        if (win && roomData && roomData.type === "ranked") {
-             runTransaction(ref(db, `users/${user.uid}`), u => { if(u) u.trophies = (u.trophies||0)+5; return u; });
-             updateQuest('voleybol');
+        
+        // KUPA SİSTEMİ (Sadece Ranked ise)
+        if (roomData && roomData.type === "ranked") {
+            runTransaction(ref(db, `users/${user.uid}`), u => { 
+                if(!u) return;
+                if(win) { u.trophies = (u.trophies||0)+5; updateQuest('voleybol'); }
+                else { u.trophies = Math.max(0, (u.trophies||0)-5); }
+                return u; 
+            });
+        } else {
+            // Custom odada kupa yok
+            desc = "Özel maçta kupa verilmez.";
         }
+
         document.getElementById("resTitle").innerText = title;
         document.getElementById("resTitle").style.color = win ? "#2ecc71" : "#e74c3c";
         document.getElementById("resDesc").innerText = desc;
@@ -915,136 +916,173 @@
         if (isHost && curRoom) remove(ref(db, `rooms/${curRoom}`));
     }
 
-    // --- NAVIGASYON ---
+    // --- NAVIGASYON & LİDERLİKLER ---
     const show = (id) => {
         document.querySelectorAll('body > div').forEach(d => {
-             if(d.id !== "authDiv" && !d.classList.contains("popup") && d.id !== "toast" && d.id !== "dmToast" && d.id !== "warnToast") d.classList.add("hidden");
+             if(d.id !== "authDiv" && !d.classList.contains("popup") && d.id !== "toast" && d.id !== "dmToast" && d.id !== "warnToast" && d.id !== "adminAnnounce") d.classList.add("hidden");
         });
         document.getElementById(id).classList.remove("hidden");
         document.getElementById("topBar").classList.add("hidden");
-        document.getElementById("notifToggle").classList.add("hidden"); // Oyun içinde bildirim tuşu gizle
+        document.getElementById("notifToggle").classList.add("hidden"); 
     };
     
-    document.getElementById("btnC").onclick = () => { show("gameRoot"); loadLeaderboard(); };
-    document.getElementById("btnR").onclick = () => { show("rplaceRoot"); initRplaceOnline(); };
-    document.getElementById("btnV").onclick = () => { show("voleybolRoot"); };
+    // TIKLAMACA LİDERLİK TABLOSU DÜZELTME
+    document.getElementById("btnC").onclick = () => { show("gameRoot"); 
+        const q = query(ref(db, "users"), orderByChild("score"), limitToLast(10));
+        onValue(q, s => {
+            const div = document.getElementById("leaderboard"); div.innerHTML = "";
+            let list = []; 
+            s.forEach(c => { list.push(c.val()); });
+            // Firebase ascending verir, ters çevir
+            list.reverse().forEach((u, i) => div.innerHTML += `<div style="padding:5px; border-bottom:1px solid #333;">${i+1}. ${u.username} - ${formatNum(u.score)}</div>`);
+        });
+    };
+    document.getElementById("btnR").onclick = () => { show("rplaceRoot"); 
+        const myRef = ref(db, `rplace/online/${user.uid}`); onDisconnect(myRef).remove(); set(myRef, {u: userData.username});
+        onValue(ref(db, "rplace/online"), s => {
+             const d = s.val(); let c=0; const l=document.getElementById("onlineList"); l.innerHTML="";
+             if(d) Object.keys(d).forEach(k=>{ if(!d[k].u)return; c++; l.innerHTML+=`<div style="padding:5px; border-bottom:1px solid #333;" onclick="openProfileByName('${d[k].u}')">${d[k].u}</div>`; });
+             document.getElementById("rCount").innerText = c;
+        });
+    };
+    
+    // VOLEYBOL LİDERLİK TABLOSU
+    document.getElementById("btnV").onclick = () => { show("voleybolRoot"); 
+        // Voleybol menüsünde chat yerine leaderboard göster
+        document.getElementById("vRightMenu").classList.remove("hidden");
+        document.getElementById("vChatBox").classList.add("hidden");
+        document.getElementById("vMenuSection").classList.remove("hidden");
+        document.getElementById("vCustomDiv").classList.remove("hidden");
+
+        const q = query(ref(db, "users"), orderByChild("trophies"), limitToLast(10));
+        onValue(q, s => {
+             const div = document.getElementById("vLeaderboard"); div.innerHTML = "";
+             let list = []; s.forEach(c => list.push(c.val()));
+             list.reverse().forEach((u,i) => div.innerHTML += `<div class="leader-item"><span>${i+1}. ${u.username}</span><span style="color:#f1c40f;">${u.trophies}</span></div>`);
+        });
+    };
     
     document.querySelectorAll(".backMenu").forEach(b => b.onclick = () => location.reload());
 
-    // DM & Bildirim Ayarları
-    window.toggleNotifs = () => {
-        notifsEnabled = !notifsEnabled;
-        document.getElementById("notifToggle").innerText = notifsEnabled ? "🔔" : "🔕";
-        showToast(notifsEnabled ? "Bildirimler Açık" : "Bildirimler Kapalı");
-    };
-    window.openDMFromToast = () => {
-        const t = document.getElementById("dmToast");
-        openDM(t.dataset.uid, t.dataset.name);
-        t.style.display = "none";
-    };
-    window.openDM = (uid, name) => {
-        currentDmTarget = { uid, name };
-        document.getElementById("dmTitle").innerText = "Sohbet: " + name;
-        document.getElementById("dmPop").style.display = "flex";
-        
-        const chatId = user.uid < uid ? `${user.uid}_${uid}` : `${uid}_${user.uid}`;
-        onValue(ref(db, `dms/${chatId}`), s => {
-            const msgs = s.val();
-            const div = document.getElementById("dmMsgs");
-            div.innerHTML = "";
-            if(msgs) {
-                Object.values(msgs).forEach(m => {
-                    const isMe = m.sender === user.uid;
-                    div.innerHTML += `<div style="color:${isMe?'#3498db':'#ccc'}; margin-bottom:5px;"><b>${isMe?'Sen':name}:</b> ${m.msg}</div>`;
-                });
-                div.scrollTop = div.scrollHeight;
+    // --- YAZI TURA ---
+    window.playCasino = (choice) => {
+        const bet = parseInt(document.getElementById("betAmount").value);
+        if (!bet || bet <= 0) return;
+        runTransaction(ref(db, "users/" + user.uid), d => {
+            if (!d || d.score < bet) return; 
+            d.score -= bet; return d;
+        }).then(res => {
+            if (!res.committed) { showToast("Yetersiz Bakiye!"); return; }
+            const resVal = Math.random() < 0.5 ? 'yazi' : 'tura';
+            const win = resVal === choice;
+            const el = document.getElementById("casinoRes");
+            if (win) {
+                runTransaction(ref(db, `users/${user.uid}/score`), s => (s||0) + (bet*2));
+                el.innerText = "KAZANDIN!"; el.style.color = "#2ecc71";
+            } else {
+                el.innerText = "KAYBETTİN!"; el.style.color = "#e74c3c";
             }
         });
     };
-    window.sendDM = () => {
-        const txt = document.getElementById("dmInput").value;
-        if (!txt || !currentDmTarget) return;
-        const uid = currentDmTarget.uid;
+    
+    // --- ARKADAŞLIK & PROFİL SİSTEMİ ---
+    window.switchTab = (tab) => {
+        document.getElementById("tabQuests").style.display = tab==='quests' ? 'block':'none';
+        document.getElementById("tabFriends").style.display = tab==='friends' ? 'block':'none';
+    };
+    window.addFriend = (targetUid, targetName) => {
+        if(targetUid === user.uid) return;
+        update(ref(db, `users/${user.uid}/friends/${targetUid}`), { name: targetName });
+        showToast(targetName + " Eklendi!", "#2ecc71");
+    };
+    
+    function renderFriends() {
+        // Arkadaş listesini UID üzerinden çekip, anlık durumlarına bakacağız
+        get(ref(db, `users/${user.uid}/friends`)).then(s => {
+            const list = s.val(); const div = document.getElementById("friendList"); div.innerHTML = "";
+            if(!list) { div.innerHTML = "<div style='color:#777; font-size:12px; padding:10px;'>Henüz arkadaşın yok.</div>"; return; }
+            
+            Object.keys(list).forEach(uid => {
+                get(ref(db, `users/${uid}`)).then(uSnap => {
+                    const friendData = uSnap.val();
+                    const name = friendData ? friendData.username : list[uid].name; // Veri yoksa eski ismi kullan
+                    
+                    // Durum Hesaplama
+                    let statusClass = "st-red";
+                    if (friendData && friendData.lastActive) {
+                        const diff = Date.now() - friendData.lastActive;
+                        if (diff < 120000) statusClass = "st-green"; // 2 dk
+                        else if (diff < 300000) statusClass = "st-yellow"; // 5 dk
+                    }
+
+                    // Bildirim Kontrolü
+                    if (statusClass === "st-green" && !knownActiveFriends.has(uid)) {
+                        knownActiveFriends.add(uid);
+                        showToast(`${name} artık Aktif!`, "#2ecc71");
+                    } else if (statusClass !== "st-green") {
+                        knownActiveFriends.delete(uid);
+                    }
+
+                    div.innerHTML += `
+                    <div class="friend-item">
+                        <div style="display:flex; align-items:center;">
+                            <div class="status-dot ${statusClass}"></div>
+                            <span>${name}</span>
+                        </div>
+                        <button onclick="openDM('${uid}','${name}')" style="width:auto; padding:3px 8px; font-size:10px; margin:0;">Mesaj</button>
+                    </div>`;
+                });
+            });
+        });
+    }
+
+    window.toggleNotifs = () => { notifsEnabled = !notifsEnabled; document.getElementById("notifToggle").innerText = notifsEnabled ? "🔔" : "🔕"; showToast(notifsEnabled?"Açık":"Kapalı"); };
+    window.openDMFromToast = () => { const t=document.getElementById("dmToast"); openDM(t.dataset.uid, t.dataset.name); t.style.display="none"; };
+    window.openDM = (uid, name) => {
+        currentDmTarget = { uid, name }; document.getElementById("dmTitle").innerText = "Sohbet: " + name; document.getElementById("dmPop").style.display = "flex";
         const chatId = user.uid < uid ? `${user.uid}_${uid}` : `${uid}_${user.uid}`;
+        onValue(ref(db, `dms/${chatId}`), s => {
+            const msgs = s.val(); const div = document.getElementById("dmMsgs"); div.innerHTML = "";
+            if(msgs) { Object.values(msgs).forEach(m => { div.innerHTML += `<div style="color:${m.sender===user.uid?'#3498db':'#ccc'}; margin-bottom:5px;"><b>${m.sender===user.uid?'Sen':name}:</b> ${m.msg}</div>`; }); div.scrollTop=div.scrollHeight; }
+        });
+    };
+    window.sendDM = () => {
+        const txt = document.getElementById("dmInput").value; if (!txt || !currentDmTarget) return;
+        const uid = currentDmTarget.uid; const chatId = user.uid < uid ? `${user.uid}_${uid}` : `${uid}_${user.uid}`;
         push(ref(db, `dms/${chatId}`), { sender: user.uid, msg: txt, time: Date.now() });
         set(ref(db, `users/${uid}/notifications`), { type:'dm', senderUid: user.uid, senderName: userData.username, msg: txt });
         document.getElementById("dmInput").value = "";
     };
-
-    // SOSYAL FONKSİYONLAR
-    window.openProfile = () => document.getElementById("profilePop").style.display = "flex";
-    window.toggleFriendTab = (t) => {
-        document.getElementById("friendListTab").classList.toggle("hidden", t!=='list');
-        document.getElementById("friendAddTab").classList.toggle("hidden", t!=='add');
-    };
-    window.sendFriendReq = () => {
-        const target = document.getElementById("friendInput").value;
-        if (!target) return;
-        findUserByName(target, (uid) => {
-             if (uid) { set(ref(db, `users/${uid}/requests/${user.uid}`), userData.username); showToast("İstek yollandı!"); }
-             else showToast("Bulunamadı.");
-        });
-    };
-    window.acceptFriend = (fid, fname) => {
-        set(ref(db, `users/${user.uid}/friends/${fid}`), fname);
-        set(ref(db, `users/${fid}/friends/${user.uid}`), userData.username);
-        remove(ref(db, `users/${user.uid}/requests/${fid}`));
-    };
-    window.rejectFriend = (fid) => remove(ref(db, `users/${user.uid}/requests/${fid}`));
     
+    // Profil Görüntüleme
+    window.openProfile = () => { 
+        currentViewProf = user.uid;
+        document.getElementById("profName").innerText = userData.username; 
+        document.getElementById("profActionBtn").innerText = "Düzenle";
+        document.getElementById("profActionBtn").onclick = editProfilePic;
+        document.getElementById("profilePop").style.display = "flex"; 
+    };
     window.openProfileByName = (name) => {
-        findUserByName(name, (uid) => {
-             if(uid) {
-                 get(ref(db, `users/${uid}`)).then(s => {
-                     const u = s.val();
-                     document.getElementById("viewImg").src = u.img || `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
-                     document.getElementById("viewName").innerText = u.username;
-                     document.getElementById("viewName").style.color = u.nameColor || "#aaa";
-                     document.getElementById("viewStats").innerText = `🏆 ${u.trophies||0} Kupa | 🪙 ${u.kcoin||0} K-Coin`;
-                     document.getElementById("viewUserPop").style.display = "flex";
-                 });
-             }
+        findUidByName(name).then(uid => {
+            if(!uid) return;
+            currentViewProf = uid;
+            get(ref(db, `users/${uid}`)).then(s => {
+                const d = s.val();
+                document.getElementById("profName").innerText = d.username;
+                document.getElementById("profCoin").innerText = d.kcoin || 0;
+                document.getElementById("profActionBtn").innerText = "Arkadaş Ekle";
+                document.getElementById("profActionBtn").onclick = () => addFriend(uid, d.username);
+                document.getElementById("profilePop").style.display = "flex";
+            });
         });
     };
+
     window.editProfilePic = () => document.getElementById("editProfPop").style.display = "flex";
-    window.saveProfilePic = () => {
-        const url = document.getElementById("newProfUrl").value;
-        if(url) update(ref(db, `users/${user.uid}`), { img: url });
-        document.getElementById("editProfPop").style.display = "none";
-    };
-
-    function initRplaceOnline() {
-        // Online listesi kodu (öncekiyle aynı, sadece temizlik)
-        const myRef = ref(db, `rplace/online/${user.uid}`);
-        onDisconnect(myRef).remove();
-        set(myRef, {u: userData.username});
-        onValue(ref(db, "rplace/online"), s => {
-             const d = s.val();
-             let c=0; const l=document.getElementById("onlineList"); l.innerHTML="";
-             if(d) Object.keys(d).forEach(k=>{ 
-                 c++; l.innerHTML+=`<div style="padding:5px; border-bottom:1px solid #333;" onclick="openProfileByName('${d[k].u}')">${d[k].u}</div>`; 
-             });
-             document.getElementById("rCount").innerText = c;
-        });
-    }
-
-    // AUTH
-    document.getElementById("loginBtn").onclick = () => signInWithEmailAndPassword(auth, document.getElementById("username").value + "@ok.com", document.getElementById("password").value).catch(e => showToast(e.message));
-    document.getElementById("registerBtn").onclick = async () => {
-        try {
-            const name = document.getElementById("username").value;
-            const res = await createUserWithEmailAndPassword(auth, name + "@ok.com", document.getElementById("password").value);
-            await set(ref(db, "users/" + res.user.uid), { username: name, score: 0, power: 1, paint: 10, kcoin: 0, autoClick: 0, ownedColors: ["#aaa"] });
-            showToast("Kayıt Başarılı!");
-        } catch(e) { showToast(e.message); }
-    };
-    window.signOutFunc = () => signOut(auth).then(()=>location.reload());
-
-    // QUEST HELPERS
+    window.saveProfilePic = () => { update(ref(db, `users/${user.uid}`), { img: document.getElementById("newProfUrl").value }); document.getElementById("editProfPop").style.display = "none"; };
+    
     function checkDailyQuests() {
         get(ref(db, `users/${user.uid}/dailyQuests`)).then(s => {
-            const d = s.val();
-            const today = new Date().toDateString();
+            const d = s.val(); const today = new Date().toDateString();
             if (!d || d.date !== today) {
                 const q1 = { type: 'rplace', target: Math.floor(Math.random()*20)+5, current: 0, desc: 'Pixel Boya' };
                 const q2 = { type: 'voleybol', target: Math.floor(Math.random()*5)+1, current: 0, desc: 'Voleybol Kazan' };
@@ -1060,59 +1098,27 @@
             list.forEach(q => {
                 if (q.type === type && q.current < q.target) {
                     q.current += amount;
-                    if (q.current >= q.target) {
-                         runTransaction(ref(db, `users/${user.uid}/kcoin`), k => (k||0)+1);
-                         showToast(`Görev Tamam! (+1 K-Coin)`, "#f1c40f");
-                    }
+                    if (q.current >= q.target) { runTransaction(ref(db, `users/${user.uid}/kcoin`), k => (k||0)+1); showToast("Görev Tamam!", "#f1c40f"); }
                 }
-            });
-            return list;
+            }); return list;
         });
     }
     function renderQuests() {
         get(ref(db, `users/${user.uid}/dailyQuests/list`)).then(s => {
-            const list = s.val();
-            const div = document.getElementById("questList");
-            div.innerHTML = "";
-            if (!list) return;
+            const list = s.val(); const div = document.getElementById("questList"); div.innerHTML = ""; if (!list) return;
             list.forEach(q => {
                 const perc = Math.min(100, (q.current/q.target)*100);
-                const color = q.current >= q.target ? "#2ecc71" : "#e67e22";
-                div.innerHTML += `
-                <div style="margin-bottom:8px;">
-                    <div style="display:flex; justify-content:space-between; font-size:11px;">
-                        <span>${q.desc} (${q.target})</span>
-                        <span style="color:${color}">${q.current}/${q.target}</span>
-                    </div>
-                    <div style="width:100%; height:4px; background:#333; margin-top:2px;">
-                        <div style="width:${perc}%; height:100%; background:${color};"></div>
-                    </div>
-                </div>`;
+                div.innerHTML += `<div style="margin-bottom:8px;"><div style="display:flex; justify-content:space-between; font-size:11px;"><span>${q.desc} (${q.target})</span><span style="color:${q.current>=q.target?"#2ecc71":"#e67e22"}">${q.current}/${q.target}</span></div><div style="width:100%; height:4px; background:#333; margin-top:2px;"><div style="width:${perc}%; height:100%; background:${q.current>=q.target?"#2ecc71":"#e67e22"};"></div></div></div>`;
             });
         });
     }
-
-    // YAZI TURA
-    window.playCasino = (choice) => {
-        const bet = parseInt(document.getElementById("betAmount").value);
-        if (!bet || bet <= 0) return;
-        runTransaction(ref(db, "users/" + user.uid), d => {
-            if (!d || d.score < bet) return;
-            d.score -= bet;
-            return d;
-        }).then(res => {
-            if (!res.committed) { showToast("Yetersiz Bakiye!"); return; }
-            const resVal = Math.random() < 0.5 ? 'yazi' : 'tura';
-            const win = resVal === choice;
-            const el = document.getElementById("casinoRes");
-            if (win) {
-                runTransaction(ref(db, `users/${user.uid}/score`), s => (s||0) + (bet*2));
-                el.innerText = "KAZANDIN! " + resVal.toUpperCase(); el.style.color = "#2ecc71";
-            } else {
-                el.innerText = "KAYBETTİN! " + resVal.toUpperCase(); el.style.color = "#e74c3c";
-            }
-        });
+    
+    // Auth Funcs
+    document.getElementById("loginBtn").onclick = () => signInWithEmailAndPassword(auth, document.getElementById("username").value + "@ok.com", document.getElementById("password").value).catch(e => showToast(e.message));
+    document.getElementById("registerBtn").onclick = async () => {
+        try { const name = document.getElementById("username").value; const res = await createUserWithEmailAndPassword(auth, name + "@ok.com", document.getElementById("password").value); await set(ref(db, "users/" + res.user.uid), { username: name, score: 0, power: 1, paint: 10, kcoin: 0, autoClick: 0, ownedColors: ["#aaa"], trophies: 0 }); showToast("Kayıt Başarılı!"); } catch(e) { showToast(e.message); }
     };
+    window.signOutFunc = () => signOut(auth).then(()=>location.reload());
 
 </script>
 </body>
